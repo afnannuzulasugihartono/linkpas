@@ -52,11 +52,16 @@
       </section>
 
       <section class="card upgrade-card" id="upgrade-card">
-        <div>
+        <div class="upgrade-copy">
           <h3>Punya lebih dari 50 link?</h3>
           <p>LINKPAS Pro memproses link tanpa batas aplikasi + export CSV/TXT. Sekali bayar Rp19.000.</p>
+          <div class="license-form" id="license-form">
+            <input id="license-input" type="text" autocomplete="off" autocapitalize="characters" placeholder="Kode lisensi: LP-..." aria-label="Kode lisensi LINKPAS Pro" />
+            <button class="secondary" id="activate-license-btn" type="button">Aktifkan kode</button>
+          </div>
+          <div class="license-status" id="license-status" aria-live="polite"></div>
         </div>
-        <a class="button-link primary" id="upgrade-link" href="#" target="_blank" rel="noreferrer">Buka LINKPAS Pro</a>
+        <a class="button-link primary" id="upgrade-link" href="#" target="_blank" rel="noreferrer">Beli LINKPAS Pro</a>
       </section>
 
       <section class="stats" id="stats-panel" hidden>
@@ -111,6 +116,7 @@
   </script>
   <script src="./config.js"></script>
   <script src="./core.js"></script>
+  <script src="./license.js"></script>
   <script src="./app.js"></script>
   <script src="./pwa.js"></script>
 </body>
