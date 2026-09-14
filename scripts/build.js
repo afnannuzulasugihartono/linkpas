@@ -4,7 +4,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const src = path.join(root, 'src');
 const out = path.join(root, 'dist', 'demo');
-const common = ['index.html', 'styles.css', 'pwa.css', 'app.js', 'license.js', 'pwa.js', 'core.js', 'manifest.webmanifest', 'sw.js', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
+const common = ['index.html', 'styles.css', 'pwa.css', 'diagnostics.js', 'app.js', 'license.js', 'pwa.js', 'core.js', 'manifest.webmanifest', 'sw.js', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 fs.rmSync(path.join(root, 'dist', 'pro'), { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
@@ -19,4 +19,4 @@ fs.copyFileSync(
   path.join(wellKnownOut, 'assetlinks.json')
 );
 
-console.log('Built LINKPAS public PWA bundle. Pro is unlocked by backend license entitlement.');
+console.log('Built LINKPAS public PWA bundle with Beta Diagnostics. Pro is unlocked by backend license entitlement.');
