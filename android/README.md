@@ -10,6 +10,8 @@ Canonical identity:
 
 The canonical Bubblewrap configuration is `twa-manifest.json`. The project structure follows the current Bubblewrap / Android Browser Helper TWA pattern. Android Browser Helper is pinned to `2.7.3`.
 
-Signing material is intentionally NOT stored in Git. `linkpas-release.keystore`, `*.jks`, `*.keystore`, `key.properties`, and local build output are ignored. Release signing is deferred to checkpoint A4.
+Signing material is intentionally NOT stored in Git. `linkpas-release.keystore`, `*.jks`, `*.keystore`, `key.properties`, and local build output are ignored.
 
-Checkpoint A3 will perform the first debug build and resolve only build-environment issues needed for that build.
+A3 debug build command: `gradle --no-daemon :app:assembleDebug`.
+
+A5 release flow builds `android/app/build/outputs/apk/release/app-release-unsigned.apk` in CI, then signs that release artifact outside Git with the private LINKPAS release key established in A4.
