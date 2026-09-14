@@ -107,7 +107,6 @@
   </template>
 
   <script>
-    // Inject result UI once so IDs are available before app.js starts.
     const resultsCard = document.querySelector('#results-card');
     const inner = document.querySelector('#results-panel');
     const tpl = document.querySelector('#results-template');
@@ -115,6 +114,7 @@
     inner.hidden = true;
   </script>
   <script src="./config.js"></script>
+  <script src="./diagnostics.js"></script>
   <script src="./core.js"></script>
   <script src="./license.js"></script>
   <script src="./app.js"></script>
