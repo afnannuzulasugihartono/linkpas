@@ -4,6 +4,7 @@
   const limit = isPro ? Infinity : (cfg.limit || 50);
   const purchaseUrl = cfg.purchaseUrl || 'https://lynk.id/barangpas';
   const Core = window.LinkPasCore;
+  const diagnostics = window.LinkPasDiagnostics;
 
   const els = {
     input: document.querySelector('#link-input'),
@@ -36,6 +37,7 @@
 
   let result = null;
 
+  diagnostics?.breadcrumb('app_ready', isPro ? 'pro' : 'demo');
   els.modeBadge.textContent = isPro ? 'PRO • Unlimited' : `DEMO • ${limit} link`;
   if (isPro) {
     els.upgrade?.remove();
@@ -69,7 +71,9 @@
   }
 
   function process() {
+    diagnostics?.breadcrumb('process_start');
     result = Core.processText(els.input.value, limit);
+    diagnostics?.breadcrumb('process_complete', `processed=${result.processedCount};unique=${result.uniqueCount};truncated=${result.truncatedCount}`);
     render();
     if (!result.processedCount) {
       showMessage('Belum ada URL yang bisa diproses.', 'warn');
@@ -137,6 +141,7 @@
     els.results.querySelectorAll('.mini-copy').forEach((button) => {
       button.addEventListener('click', async () => {
         await navigator.clipboard.writeText(button.dataset.copy || '');
+        diagnostics?.breadcrumb('copy_single');
         button.textContent = 'Copied';
         setTimeout(() => { button.textContent = 'Copy'; }, 1200);
       });
@@ -151,6 +156,7 @@
     const links = cleanUniqueLinks();
     if (!links.length) return showMessage('Proses link dulu.', 'warn');
     await navigator.clipboard.writeText(links.join('\n'));
+    diagnostics?.breadcrumb('copy_clean', `count=${links.length}`);
     showMessage(`${links.length} link unik disalin.`, 'success');
   }
 
@@ -167,12 +173,14 @@
   function downloadTxt() {
     const links = cleanUniqueLinks();
     if (!links.length) return showMessage('Proses link dulu.', 'warn');
+    diagnostics?.breadcrumb('export_txt', `count=${links.length}`);
     downloadFile(`linkpas-clean-${dateStamp()}.txt`, links.join('\n'), 'text/plain;charset=utf-8');
   }
 
   function downloadCsv() {
     if (!result?.rows?.length) return showMessage('Proses link dulu.', 'warn');
     const validRows = result.rows.filter((row) => row.valid);
+    diagnostics?.breadcrumb('export_csv', `count=${validRows.length}`);
     downloadFile(`linkpas-${dateStamp()}.csv`, '\uFEFF' + Core.toCsv(validRows), 'text/csv;charset=utf-8');
   }
 
@@ -193,6 +201,7 @@
   els.input.addEventListener('input', updateCount);
   els.process.addEventListener('click', process);
   els.clear.addEventListener('click', () => {
+    diagnostics?.breadcrumb('clear_input');
     els.input.value = '';
     result = null;
     updateCount();
@@ -202,6 +211,7 @@
     els.input.focus();
   });
   els.sample.addEventListener('click', () => {
+    diagnostics?.breadcrumb('sample_loaded');
     els.input.value = sampleText;
     updateCount();
     process();
