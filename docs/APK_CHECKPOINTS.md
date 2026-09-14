@@ -2,7 +2,7 @@
 
 Goal: produce a signed, installable LINKPAS Android APK using TWA, without changing the product scope.
 
-Each checkpoint is intentionally sized for about 15-20 minutes, with a hard stop at 25 minutes.
+Every checkpoint is intentionally sized for **12-15 minutes**, with a **hard stop at 18 minutes**. No checkpoint should be planned to consume 20 minutes or more. If a checkpoint is too large, split it before implementation.
 
 ## A1 — Audit and prepare PWA
 
@@ -17,7 +17,7 @@ Acceptance:
 - PWA launches from `https://linkpas.vercel.app/` without a blocking error.
 - Any remaining blocker is documented before advancing.
 
-Target: 20-25 minutes.
+Target: 12-15 minutes. Hard stop: 18 minutes.
 
 ## A2 — Create Android/TWA project
 
@@ -36,7 +36,7 @@ Acceptance:
 - Package/host/app name are consistent.
 - No secret or signing material is committed.
 
-Target: 20-25 minutes.
+Target: 12-15 minutes. Hard stop: 18 minutes.
 
 ## A3 — Build debug APK
 
@@ -49,7 +49,7 @@ Acceptance:
 - Build command and resulting APK path are recorded.
 - No unrelated product code changes.
 
-Target: 15-20 minutes.
+Target: 12-15 minutes. Hard stop: 18 minutes.
 
 ## A4 — Signing identity and Digital Asset Links
 
@@ -64,7 +64,7 @@ Acceptance:
 - `assetlinks.json` contains the correct package and fingerprint.
 - Production URL for `assetlinks.json` returns HTTP 200 after deploy.
 
-Target: 20-25 minutes.
+Target: 12-15 minutes. Hard stop: 18 minutes. Split into A4a/A4b before execution if environment/setup makes this too large.
 
 ## A5 — Build signed release APK
 
@@ -79,7 +79,7 @@ Acceptance:
 - Version name/code are recorded.
 - SHA-256 checksum of the APK is recorded.
 
-Target: 15-20 minutes.
+Target: 12-15 minutes. Hard stop: 18 minutes.
 
 ## A6 — Android acceptance test
 
@@ -98,7 +98,7 @@ Acceptance:
 - Every item is PASS, or blockers are recorded precisely.
 - No claim of APK readiness if TWA verification falls back to a browser/custom tab unexpectedly.
 
-Target: 20-25 minutes.
+Target: 12-15 minutes. Hard stop: 18 minutes. Split the test matrix before execution if all checks cannot reasonably fit.
 
 ## A7 — Fix release-blocking APK issues
 
@@ -112,7 +112,7 @@ Acceptance:
 
 If A6 has no release blockers, this checkpoint may complete as a verified no-op.
 
-Target: 20-25 minutes.
+Target: 12-15 minutes. Hard stop: 18 minutes. If multiple unrelated blockers exist, split A7 before implementation.
 
 ## A8 — Publish APK Beta release
 
@@ -126,10 +126,10 @@ Acceptance:
 - Production web app remains healthy.
 - `PROJECT_STATE.json` marks milestone `APK_BETA` complete.
 
-Target: 15-20 minutes.
+Target: 12-15 minutes. Hard stop: 18 minutes.
 
 ---
 
 ## Continuation rule
 
-When the user says **"lanjutkan"**, execute the current checkpoint from `PROJECT_STATE.json` fully, then stop. Never execute two checkpoint IDs in one continuation turn.
+When the user says **"lanjutkan"**, execute the current checkpoint from `PROJECT_STATE.json` fully, validate it, update state, then stop. Never execute two checkpoint IDs in one continuation turn.
