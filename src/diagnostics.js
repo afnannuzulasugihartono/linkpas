@@ -5,6 +5,7 @@
   const MAX_BREADCRUMBS = 20;
   const breadcrumbs = [];
   let lastReportId = null;
+  let lastSendOutcome = { ok: null, status: null, error: null };
   let sending = false;
 
   function safeText(value, max = 800) {
@@ -76,11 +77,16 @@
         credentials: 'omit',
         keepalive: true,
       });
-      if (!response.ok) return null;
+      if (!response.ok) {
+        lastSendOutcome = { ok: false, status: response.status, error: `HTTP ${response.status}` };
+        return null;
+      }
       const body = await response.json().catch(() => null);
       lastReportId = body?.report_id || null;
+      lastSendOutcome = { ok: Boolean(lastReportId), status: response.status, error: lastReportId ? null : 'missing_report_id' };
       return lastReportId;
-    } catch {
+    } catch (error) {
+      lastSendOutcome = { ok: false, status: null, error: error instanceof Error ? error.message : 'fetch_failed' };
       return null;
     } finally {
       sending = false;
@@ -150,14 +156,33 @@
     fetch: trackedFetch,
     getBreadcrumbs: () => breadcrumbs.slice(),
     getLastReportId: () => lastReportId,
+    getLastSendOutcome: () => ({ ...lastSendOutcome }),
     getServiceWorkerState: serviceWorkerState,
   };
 
   // Beta-only deterministic validation hook. It runs only when explicitly requested by query string.
   const testType = new URLSearchParams(location.search).get('__linkpas_diag_test');
-  if (testType === 'window-error') {
-    setTimeout(() => { throw new Error('LINKPAS_DIAG_TEST_WINDOW_ERROR'); }, 250);
-  } else if (testType === 'promise-rejection') {
-    setTimeout(() => { Promise.reject(new Error('LINKPAS_DIAG_TEST_PROMISE_REJECTION')); }, 250);
+  if (testType === 'window-error' || testType === 'promise-rejection') {
+    const result = document.createElement('div');
+    result.id = 'linkpas-diag-test-result';
+    result.setAttribute('role', 'status');
+    result.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99999;padding:8px;background:#fff;color:#000;font:12px monospace';
+    result.textContent = 'DIAG_TEST_PENDING';
+    document.documentElement.appendChild(result);
+    const refresh = () => {
+      const outcome = lastSendOutcome;
+      result.textContent = outcome.ok
+        ? `DIAG_TEST_SENT ${lastReportId}`
+        : outcome.ok === false
+          ? `DIAG_TEST_FAILED ${outcome.status || ''} ${outcome.error || ''}`.trim()
+          : 'DIAG_TEST_PENDING';
+    };
+    const timer = setInterval(refresh, 200);
+    setTimeout(() => clearInterval(timer), 8000);
+    if (testType === 'window-error') {
+      setTimeout(() => { throw new Error('LINKPAS_DIAG_TEST_WINDOW_ERROR'); }, 250);
+    } else {
+      setTimeout(() => { Promise.reject(new Error('LINKPAS_DIAG_TEST_PROMISE_REJECTION')); }, 250);
+    }
   }
 })();
