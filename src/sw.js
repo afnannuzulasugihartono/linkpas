@@ -1,10 +1,11 @@
-const CACHE_NAME = 'linkpas-pwa-v2';
+const CACHE_NAME = 'linkpas-pwa-v3';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
   './pwa.css',
   './config.js',
+  './diagnostics.js',
   './core.js',
   './license.js',
   './app.js',
