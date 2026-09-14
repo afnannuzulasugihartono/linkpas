@@ -29,7 +29,7 @@ When the user says **"lanjutkan"** (or an equivalent request to continue):
 
 - Target per checkpoint: **12-15 minutes**.
 - Hard maximum: **18 minutes**. A checkpoint must be designed to finish in **less than 20 minutes**.
-- Before implementation begins, if the current checkpoint cannot reasonably fit inside 18 minutes, split only that checkpoint into minimal sub-checkpoints (`A4a`, `A4b`, etc.) and update the roadmap/state first.
+- Before implementation begins, if the current checkpoint cannot reasonably fit inside 18 minutes, split only that checkpoint into minimal sub-checkpoints (`A4a`, `A4b`, `D4a`, etc.) and update the roadmap/state first.
 - Once execution starts, do not silently extend the checkpoint past 18 minutes.
 - If an unexpected external blocker prevents completion within 18 minutes, stop at a clean boundary and mark it `BLOCKED` with evidence.
 - Do not compensate by doing multiple checkpoints at once.
@@ -77,7 +77,7 @@ On a blocker:
 Use this compact shape:
 
 - `STATUS: COMPLETE | BLOCKED | FAILED`
-- `CHECKPOINT: Ax`
+- `CHECKPOINT:` exact current checkpoint ID (`A#`, `D#`, or split sub-checkpoint)
 - `DONE:` what actually changed
 - `EVIDENCE:` test/build/deployment evidence
 - `NEXT:` exact next checkpoint from `PROJECT_STATE.json`
