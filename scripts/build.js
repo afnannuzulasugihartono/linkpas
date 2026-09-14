@@ -11,4 +11,12 @@ fs.mkdirSync(out, { recursive: true });
 for (const file of common) fs.copyFileSync(path.join(src, file), path.join(out, file));
 fs.copyFileSync(path.join(src, 'config.demo.js'), path.join(out, 'config.js'));
 fs.copyFileSync(path.join(root, 'LICENSE.txt'), path.join(out, 'LICENSE.txt'));
+
+const wellKnownOut = path.join(out, '.well-known');
+fs.mkdirSync(wellKnownOut, { recursive: true });
+fs.copyFileSync(
+  path.join(src, '.well-known', 'assetlinks.json'),
+  path.join(wellKnownOut, 'assetlinks.json')
+);
+
 console.log('Built LINKPAS public PWA bundle. Pro is unlocked by backend license entitlement.');
