@@ -1,0 +1,17 @@
+{
+  "project": "LINKPAS",
+  "milestone": "APK_BETA",
+  "status": "READY",
+  "current_checkpoint": "A1",
+  "last_completed_checkpoint": null,
+  "completed_checkpoints": [],
+  "next_action": "Audit and prepare the LINKPAS PWA for TWA according to docs/APK_CHECKPOINTS.md A1.",
+  "blocker": null,
+  "continuation_semantics": {
+    "trigger": "lanjutkan",
+    "checkpoints_per_turn": 1,
+    "hard_timebox_minutes": 25,
+    "must_update_state_after_checkpoint": true,
+    "must_stop_before_next_checkpoint": true
+  }
+}
