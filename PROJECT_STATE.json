@@ -2,11 +2,18 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "A6",
+  "current_checkpoint": "D1",
   "last_completed_checkpoint": "A5",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5"],
-  "next_action": "Run Android acceptance testing for the signed APK according to docs/APK_CHECKPOINTS.md A6.",
+  "next_action": "Create the Supabase Beta Diagnostics backend according to docs/APK_CHECKPOINTS.md D1.",
   "blocker": null,
+  "roadmap_revision": {
+    "reason": "User explicitly requested Beta Diagnostics inside LINKPAS so failures can be inspected through Supabase without relying on screenshots.",
+    "inserted_before": "A6",
+    "diagnostic_checkpoints": ["D1", "D2", "D3", "D4", "D5"],
+    "resume_after_diagnostics": "A6",
+    "privacy_rule": "Do not collect affiliate-link contents, clipboard contents, buyer email, raw license keys, passwords, or other user content by default."
+  },
   "last_checkpoint_evidence": {
     "checkpoint": "A5",
     "result": "COMPLETE",
