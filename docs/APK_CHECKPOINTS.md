@@ -1,6 +1,6 @@
 # LINKPAS APK Beta Roadmap
 
-Goal: produce a signed, installable LINKPAS Android APK using TWA, without changing the product scope.
+Goal: produce a signed, installable LINKPAS Android APK using TWA, with an internal Beta Diagnostics layer that makes failures observable before final Android acceptance testing.
 
 Every checkpoint is intentionally sized for **12-15 minutes**, with a **hard stop at 18 minutes**. No checkpoint should be planned to consume 20 minutes or more. If a checkpoint is too large, split it before implementation.
 
@@ -81,7 +81,104 @@ Acceptance:
 
 Target: 12-15 minutes. Hard stop: 18 minutes.
 
+# Beta Diagnostics interlude
+
+The user explicitly requested observability inside LINKPAS Beta so most failures can be diagnosed from Supabase without requiring screenshots. These checkpoints are inserted after A5 and before A6. They are Beta-only infrastructure and must not expand LINKPAS product scope beyond diagnostics.
+
+Privacy baseline for D1-D5:
+- Do not collect affiliate-link contents, clipboard contents, buyer email, license keys, passwords, message contents, or other user content by default.
+- Collect only technical metadata needed to diagnose failures.
+- Never commit Supabase service-role keys or other secrets to Git.
+- Diagnostic upload failures must never block LINKPAS core local functionality.
+
+## D1 — Supabase diagnostics backend
+
+Scope:
+- Create the minimal backend for Beta diagnostic reports.
+- Add a table such as `linkpas_diagnostic_reports` with technical fields for report ID, timestamps, app/build version, platform, error type/message/stack, page, network/service-worker state, breadcrumbs, and structured diagnostic metadata.
+- Provide a safe ingestion path suitable for the public Beta app while keeping privileged database access server-side.
+- Preserve a readable path through the connected Supabase tooling so ChatGPT can inspect reports when the user says `cek LINKPAS`.
+
+Acceptance:
+- Diagnostic table exists with RLS enabled.
+- Public clients cannot arbitrarily read diagnostic rows.
+- Diagnostic ingestion works without exposing a service-role key in the app.
+- One sanitized test report can be written and read back through authorized Supabase tooling.
+- Schema and privacy exclusions are documented.
+
+Target: 12-15 minutes. Hard stop: 18 minutes.
+
+## D2 — PWA error collector and breadcrumbs
+
+Scope:
+- Add a Beta-only diagnostic collector to the LINKPAS PWA.
+- Capture `window.onerror`, `unhandledrejection`, selected important fetch failures, service-worker state/failures, online/offline state, app/build version, and a bounded rolling breadcrumb buffer.
+- Send sanitized reports asynchronously to the D1 ingestion path.
+- Ensure telemetry failure is non-blocking.
+
+Acceptance:
+- A controlled JavaScript error creates one sanitized diagnostic report in Supabase.
+- An unhandled promise rejection creates one sanitized report.
+- Breadcrumbs are bounded and contain only event names/technical state, not pasted link contents or secrets.
+- Core LINKPAS processing still works if Supabase diagnostics is unavailable.
+- Existing web tests/build remain green or any blocker is recorded precisely.
+
+Target: 12-15 minutes. Hard stop: 18 minutes.
+
+## D3 — Hidden Beta Diagnostics panel
+
+Scope:
+- Add a hidden diagnostics surface inside LINKPAS Beta, not a normal user-facing feature.
+- Expose technical status such as app version, package/domain, online state, service-worker status, last diagnostic error, and last report ID.
+- Add a manual `Kirim laporan diagnostik` action that sends sanitized current state.
+- Use a low-friction hidden entry gesture such as repeated taps on the version label.
+
+Acceptance:
+- Diagnostics UI is hidden during normal usage.
+- Hidden entry reliably opens the panel.
+- Manual report produces a report ID visible in the panel and stored in Supabase.
+- Panel does not reveal secrets, raw license keys, affiliate-link contents, or clipboard contents.
+- Normal LINKPAS workflow remains unchanged when the panel is never opened.
+
+Target: 12-15 minutes. Hard stop: 18 minutes.
+
+## D4 — Android/TWA native diagnostics
+
+Scope:
+- Add minimal native diagnostics to the Android wrapper for startup and wrapper-level failures that the PWA collector cannot observe.
+- Record app version/package, launch URL, selected TWA/browser-provider state available to the app, startup stage, and uncaught native exception metadata.
+- Persist a pending native diagnostic locally if necessary and forward it safely to the D1 ingestion path when connectivity/app startup permits.
+- Keep ADB/logcat as the fallback for Android/TWA conditions that cannot be reliably observed from app code.
+
+Acceptance:
+- A controlled native diagnostic event can be emitted and appears in Supabase.
+- Native reporting does not include signing secrets, credentials, user content, or raw clipboard data.
+- A reporting failure cannot crash or block app startup.
+- Release build still succeeds with the diagnostics code included.
+- Limitations that still require ADB/logcat are documented.
+
+Target: 12-15 minutes. Hard stop: 18 minutes. Split D4 before implementation if native build/retest cannot fit safely.
+
+## D5 — End-to-end ChatGPT diagnostics workflow and ADB fallback
+
+Scope:
+- Validate the full path: LINKPAS Beta failure → Supabase report → ChatGPT/Supabase inspection.
+- Define the operational command semantics for `cek LINKPAS`: inspect the newest relevant reports, correlate breadcrumbs/error metadata, and report likely file/function/root cause without guessing.
+- Create a one-click Windows ADB diagnostic helper such as `LINKPAS-Debug.bat` for cases where telemetry is insufficient.
+- The helper should collect only the needed package/App Links/logcat diagnostics into a shareable debug bundle and avoid collecting unrelated device content.
+
+Acceptance:
+- A controlled Beta failure is visible through Supabase and can be inspected from ChatGPT without a screenshot.
+- The latest report has a stable report ID and enough metadata to identify the failure class.
+- `LINKPAS-Debug.bat` (or equivalent) is documented and can produce a bounded diagnostic bundle when ADB is available.
+- The workflow clearly distinguishes telemetry-visible errors from cases requiring ADB/logcat.
+- No automatic claim is made that ChatGPT can see the user's phone screen or receive unsolicited messages into an open chat.
+
+Target: 12-15 minutes. Hard stop: 18 minutes.
+
 ## A6 — Android acceptance test
+
+Prerequisite: D1-D5 complete so failures encountered during device testing can be diagnosed without relying on screenshots alone.
 
 Scope:
 Test the signed APK on Android for:
@@ -96,6 +193,7 @@ Test the signed APK on Android for:
 
 Acceptance:
 - Every item is PASS, or blockers are recorded precisely.
+- Diagnostic reports are consulted when a failure occurs.
 - No claim of APK readiness if TWA verification falls back to a browser/custom tab unexpectedly.
 
 Target: 12-15 minutes. Hard stop: 18 minutes. Split the test matrix before execution if all checks cannot reasonably fit.
