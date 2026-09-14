@@ -3,6 +3,8 @@
 LINKPAS adalah micro-tool browser-only untuk merapikan ratusan link affiliate sekaligus.
 
 ## Fitur MVP
+- Installable PWA di Android/iPhone (Add to Home Screen)
+- Offline app shell setelah kunjungan pertama
 - Ekstrak URL dari teks berantakan
 - Deteksi Shopee, TikTok, Tokopedia, Lazada, Blibli, shortlink, dan lainnya
 - Tandai shortlink
@@ -16,6 +18,14 @@ LINKPAS adalah micro-tool browser-only untuk merapikan ratusan link affiliate se
 - `dist/demo/` — Demo maksimal 50 link. CTA diarahkan ke `https://lynk.id/barangpas`.
 - `dist/pro/` — Pro tanpa limit aplikasi. Cocok dijual sebagai ZIP digital.
 
+## Build
+
+```bash
+npm run build
+```
+
+Build menghasilkan bundle Demo dan Pro dengan manifest, service worker, dan ikon aplikasi.
+
 ## Menjalankan lokal
 Karena ini static app tanpa dependency:
 
@@ -28,7 +38,7 @@ Buka http://localhost:8080
 ## Test
 
 ```bash
-node --test tests/core.test.js
+npm test
 ```
 
 ## Catatan penting
