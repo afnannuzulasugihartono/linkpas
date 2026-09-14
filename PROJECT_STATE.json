@@ -10,7 +10,10 @@
   "continuation_semantics": {
     "trigger": "lanjutkan",
     "checkpoints_per_turn": 1,
-    "hard_timebox_minutes": 25,
+    "target_timebox_minutes": 15,
+    "hard_timebox_minutes": 18,
+    "must_finish_under_minutes": 20,
+    "must_split_before_execution_if_too_large": true,
     "must_update_state_after_checkpoint": true,
     "must_stop_before_next_checkpoint": true
   }
