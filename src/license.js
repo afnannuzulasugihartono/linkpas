@@ -1,6 +1,8 @@
 (() => {
   const cfg = window.LINKPAS_CONFIG || {};
   const endpoint = cfg.licenseEndpoint || '';
+  const diagnostics = window.LinkPasDiagnostics;
+  const diagnosticFetch = diagnostics?.fetch || ((input, init) => fetch(input, init));
   const KEY_STORAGE = 'linkpas_license_key_v1';
   const CACHE_STORAGE = 'linkpas_license_cache_v1';
   const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -36,30 +38,34 @@
       return false;
     }
 
+    diagnostics?.breadcrumb('license_verify_start');
     if (!quiet) status('Memverifikasi lisensi…');
     try {
-      const response = await fetch(endpoint, {
+      const response = await diagnosticFetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ licenseKey }),
         cache: 'no-store',
         credentials: 'omit',
-      });
+      }, 'license_verify');
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const body = await response.json();
       const valid = body?.valid === true && body?.plan === 'pro';
       if (!valid) {
+        diagnostics?.breadcrumb('license_verify_invalid');
         localStorage.removeItem(CACHE_STORAGE);
         if (!quiet) status('Kode lisensi tidak aktif / tidak valid.', 'warn');
         return false;
       }
 
+      diagnostics?.breadcrumb('license_verify_ok');
       localStorage.setItem(KEY_STORAGE, licenseKey);
       localStorage.setItem(CACHE_STORAGE, JSON.stringify({ plan: 'pro', verifiedAt: Date.now() }));
       if (!quiet) status('LINKPAS Pro aktif. Memuat ulang aplikasi…', 'success');
       if (reloadOnSuccess || cfg.mode !== 'pro') setTimeout(() => location.reload(), 300);
       return true;
     } catch (error) {
+      diagnostics?.breadcrumb('license_verify_exception');
       console.warn('Verifikasi lisensi LINKPAS gagal:', error);
       if (!quiet) status('Verifikasi gagal. Cek koneksi internet lalu coba lagi.', 'warn');
       return false;
