@@ -1,0 +1,7 @@
+.topbar-actions { display: flex; align-items: center; gap: 9px; }
+.install-button { background: #173222; color: #eaf5ee; border: 1px solid #347c4d; padding: 8px 12px; border-radius: 999px; font-size: 12px; }
+.app-note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+@media (display-mode: standalone) {
+  body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  .shell { min-height: 100dvh; }
+}

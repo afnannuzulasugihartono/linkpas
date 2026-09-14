@@ -4,7 +4,8 @@
   "private": true,
   "description": "Affiliate Link Toolbox — clean, deduplicate, classify, and export affiliate links locally in the browser.",
   "scripts": {
-    "test": "node --test tests/core.test.js",
+    "build": "node scripts/build.js",
+    "test": "node --test tests/*.test.js",
     "serve:demo": "python -m http.server 8080 -d dist/demo",
     "serve:pro": "python -m http.server 8081 -d dist/pro"
   }

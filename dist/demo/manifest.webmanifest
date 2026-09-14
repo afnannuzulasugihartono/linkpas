@@ -1,0 +1,17 @@
+{
+  "name": "LINKPAS — Affiliate Link Toolbox",
+  "short_name": "LINKPAS",
+  "description": "Rapikan, kelompokkan, deduplikasi, dan export ratusan link affiliate langsung di perangkat.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07110d",
+  "theme_color": "#07110d",
+  "lang": "id-ID",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
