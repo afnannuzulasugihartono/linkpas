@@ -2,6 +2,7 @@
   const installButton = document.querySelector('#install-btn');
   const appNote = document.querySelector('#app-note');
   const message = document.querySelector('#message');
+  const diagnostics = window.LinkPasDiagnostics;
   let deferredPrompt = null;
 
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -17,10 +18,21 @@
   }
 
   async function registerServiceWorker() {
-    if (!('serviceWorker' in navigator)) return;
+    if (!('serviceWorker' in navigator)) {
+      diagnostics?.breadcrumb('service_worker_unsupported');
+      return;
+    }
     try {
-      await navigator.serviceWorker.register('./sw.js');
+      const registration = await navigator.serviceWorker.register('./sw.js');
+      diagnostics?.breadcrumb('service_worker_registered', registration.scope || 'registered');
     } catch (error) {
+      diagnostics?.breadcrumb('service_worker_register_failed');
+      void diagnostics?.report({
+        errorType: 'service_worker_registration',
+        errorMessage: error instanceof Error ? error.message : 'Service worker registration failed',
+        errorStack: error instanceof Error ? error.stack : null,
+        diagnostics: { app_stage: 'service_worker_registration' },
+      });
       console.warn('LINKPAS service worker gagal didaftarkan:', error);
     }
   }
@@ -37,11 +49,13 @@
 
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
+    diagnostics?.breadcrumb('install_prompt_available');
     deferredPrompt = event;
     updateInstallUI();
   });
 
   window.addEventListener('appinstalled', () => {
+    diagnostics?.breadcrumb('app_installed');
     deferredPrompt = null;
     if (installButton) installButton.hidden = true;
     if (appNote) appNote.textContent = 'LINKPAS berhasil dipasang sebagai aplikasi.';
@@ -49,9 +63,11 @@
   });
 
   installButton?.addEventListener('click', async () => {
+    diagnostics?.breadcrumb('install_clicked');
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
+      diagnostics?.breadcrumb('install_choice', choice.outcome || 'unknown');
       if (choice.outcome === 'accepted') {
         deferredPrompt = null;
         installButton.hidden = true;
