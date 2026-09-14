@@ -27,10 +27,12 @@ When the user says **"lanjutkan"** (or an equivalent request to continue):
 
 ## Checkpoint timebox
 
-- Target per checkpoint: **15-20 minutes**.
-- Hard maximum: **25 minutes**.
-- If the checkpoint cannot be completed safely within 25 minutes, stop at a clean boundary and mark it `BLOCKED` or split only that checkpoint into a minimal sub-checkpoint (`A4a`, `A4b`, etc.).
-- Do not compensate by expanding the session or doing multiple checkpoints at once.
+- Target per checkpoint: **12-15 minutes**.
+- Hard maximum: **18 minutes**. A checkpoint must be designed to finish in **less than 20 minutes**.
+- Before implementation begins, if the current checkpoint cannot reasonably fit inside 18 minutes, split only that checkpoint into minimal sub-checkpoints (`A4a`, `A4b`, etc.) and update the roadmap/state first.
+- Once execution starts, do not silently extend the checkpoint past 18 minutes.
+- If an unexpected external blocker prevents completion within 18 minutes, stop at a clean boundary and mark it `BLOCKED` with evidence.
+- Do not compensate by doing multiple checkpoints at once.
 
 ## Scope discipline
 
