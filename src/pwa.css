@@ -5,3 +5,12 @@
   body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
   .shell { min-height: 100dvh; }
 }
+.upgrade-copy { flex: 1; min-width: 0; }
+.license-form { display: grid; grid-template-columns: minmax(180px, 1fr) auto; gap: 8px; margin-top: 14px; max-width: 560px; }
+.license-status { min-height: 20px; margin-top: 8px; color: var(--muted); font-size: 12px; }
+.license-status[data-tone="success"] { color: var(--accent-2); }
+.license-status[data-tone="warn"] { color: var(--warn); }
+@media (max-width: 520px) {
+  .license-form { grid-template-columns: 1fr; }
+  .license-form button { width: 100%; }
+}

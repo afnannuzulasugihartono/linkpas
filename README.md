@@ -1,48 +1,32 @@
 # LINKPAS — Affiliate Link Toolbox
 
-LINKPAS adalah micro-tool browser-only untuk merapikan ratusan link affiliate sekaligus.
+LINKPAS adalah web app/PWA untuk merapikan banyak link affiliate langsung di perangkat.
 
-## Fitur MVP
-- Installable PWA di Android/iPhone (Add to Home Screen)
-- Offline app shell setelah kunjungan pertama
+## Live
+- Free/PWA: https://linkpas.vercel.app
+- Free memproses maksimal 50 link per sekali proses.
+- Pro Rp19.000 lifetime di-unlock dengan kode lisensi yang diverifikasi backend.
+
+## Fitur
 - Ekstrak URL dari teks berantakan
 - Deteksi Shopee, TikTok, Tokopedia, Lazada, Blibli, shortlink, dan lainnya
-- Tandai shortlink
-- Deteksi duplikat exact-normalized URL
+- Deteksi exact duplicate
 - Filter/search hasil
-- Copy link unik
+- Copy hasil bersih
 - Export TXT dan CSV
-- Semua proses lokal di browser, tanpa database dan tanpa API
+- Install ke Home Screen sebagai PWA
+- App shell offline setelah kunjungan pertama
 
-## Produk
-- `dist/demo/` — Demo maksimal 50 link. CTA diarahkan ke `https://lynk.id/barangpas`.
-- `dist/pro/` — Pro tanpa limit aplikasi. Cocok dijual sebagai ZIP digital.
+## Privasi
+Link affiliate diproses lokal di browser dan tidak dikirim ke backend. Backend hanya menerima kode lisensi saat pengguna mengaktifkan / memverifikasi LINKPAS Pro.
 
-## Build
-
+## Build & test
 ```bash
 npm run build
-```
-
-Build menghasilkan bundle Demo dan Pro dengan manifest, service worker, dan ikon aplikasi.
-
-## Menjalankan lokal
-Karena ini static app tanpa dependency:
-
-```bash
-python -m http.server 8080 -d dist/demo
-```
-
-Buka http://localhost:8080
-
-## Test
-
-```bash
 npm test
 ```
 
-## Catatan penting
-LINKPAS **tidak** mengecek apakah link masih hidup, produk tersedia, atau komisi affiliate masih aktif. Tool ini hanya membersihkan dan mengorganisasi link secara lokal. Jangan menghapus query parameter affiliate karena dapat memengaruhi tracking komisi; LINKPAS mempertahankan query string.
+Output publik berada di `dist/demo/`. Tidak ada bundle Pro terpisah di repository; entitlement Pro berasal dari backend license verifier.
 
-## Harga beta yang disarankan
-Rp19.000 sekali bayar untuk versi Pro.
+## Batasan
+LINKPAS tidak mengecek apakah produk masih tersedia, link masih hidup, atau komisi affiliate masih aktif. Query string dipertahankan agar tracking affiliate tidak sengaja terhapus.
