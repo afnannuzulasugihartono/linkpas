@@ -54,11 +54,10 @@ test('diagnostic upload failure is non-blocking', async () => {
     const reportId = await api.report({ errorType: 'controlled_test' });
     assert.equal(reportId, null);
   });
-  assert.deepEqual(api.getLastSendOutcome(), {
-    ok: false,
-    status: null,
-    error: 'backend unavailable',
-  });
+  const outcome = api.getLastSendOutcome();
+  assert.equal(outcome.ok, false);
+  assert.equal(outcome.status, null);
+  assert.equal(outcome.error, 'backend unavailable');
 });
 
 test('breadcrumbs keep only the newest 20 technical events', () => {
