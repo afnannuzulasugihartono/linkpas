@@ -5,7 +5,7 @@
   "current_checkpoint": "A6a2e",
   "last_completed_checkpoint": "A6a2d",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d"],
-  "next_action": "Resume A6a2e only using the signed automatic-diagnostics recovery RC from PR #12. Install/update LINKPAS-v0.1.0-beta-rc.apk with SHA-256 2c6ff583ae5a7258b3568ac163e1ff373953a8a530d83a9a16d1b3fa37e0ca66 and open LINKPAS normally once. Inspect Supabase for durable native_self_check/native_twa_evidence and the existing production A6a2c pwa_launch_probe correlation. The enhanced pwa_startup_no_probe beacon/service-worker v6 is merged but production deployment is temporarily deferred by Vercel Hobby build-rate-limit; this does not prevent testing the repaired native durable/retry path against the already-live A6a2c PWA probe handshake. Do not require ADB unless this repaired automatic path is again exhausted. Do not start A6b unless PASS_VERIFIED_TWA is proven.",
+  "next_action": "Resume A6a2e only using the distinctly versioned signed recovery RC LINKPAS-v0.1.0-beta.2-rc.apk with SHA-256 64d87aa2cef249a1bd923e74edff18128260a7c6aa6ed9b02078a17f64707f27, versionName 0.1.0-beta.2 and versionCode 2. Install/update it and open LINKPAS normally once, then inspect Supabase. A native report from the correct binary must show app_version=0.1.0-beta.2 and build_version=2; only then evaluate native_self_check/native_twa_evidence and PWA probe correlation. Do not require ADB unless this distinctly versioned automatic path is again exhausted. Do not start A6b unless PASS_VERIFIED_TWA is proven.",
   "blocker": null,
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit inside one 18-minute checkpoint.",
@@ -134,7 +134,35 @@
       "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6",
       "signature_v1": "pass",
       "signature_v2": "pass",
-      "signature_v3": "pass"
+      "signature_v3": "pass",
+      "superseded": true
+    },
+    "versioned_recovery_rc": {
+      "reason": "The first recovery APK had different bytes but retained versionName 0.1.0-beta and versionCode 1, so on-device replacement could not be proven unambiguously. This build has a distinct Android version identity.",
+      "product_pr": 13,
+      "validation_head_sha": "9ccdca977fc5ffcc984b5b80b531bbdd269da681",
+      "merge_sha": "26b82aff33d2b59d9845b463133263f58951fcac",
+      "debug_run_id": 34973912053,
+      "debug_build": "success",
+      "release_run_id": 34973911914,
+      "android_unit_tests": "success",
+      "unsigned_release_build": "success",
+      "unsigned_artifact_id": 10398583165,
+      "filename": "LINKPAS-v0.1.0-beta.2-rc.apk",
+      "sha256": "64d87aa2cef249a1bd923e74edff18128260a7c6aa6ed9b02078a17f64707f27",
+      "size_bytes": 3814288,
+      "package": "id.barangpas.linkpas",
+      "version_name": "0.1.0-beta.2",
+      "version_code": 2,
+      "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6",
+      "signature_v1": "pass",
+      "signature_v2": "pass",
+      "signature_v3": "pass",
+      "instrumentation_markers": ["AutomaticDiagnosticOutbox", "native_self_check", "native_twa_evidence"],
+      "expected_native_report_identity": {
+        "app_version": "0.1.0-beta.2",
+        "build_version": "2"
+      }
     },
     "production_web": {
       "current_cache_generation": "linkpas-pwa-v5",
@@ -144,7 +172,7 @@
       "enhanced_deployment_status": "deferred_vercel_hobby_build_rate_limit",
       "vercel_status_context": "Vercel failure target indicates upgradeToPro=build-rate-limit on the current main commit."
     },
-    "retry_status": "ready_for_real_device_retry"
+    "retry_status": "ready_for_beta2_real_device_retry"
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
