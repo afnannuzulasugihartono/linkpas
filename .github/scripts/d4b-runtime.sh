@@ -6,6 +6,7 @@ PACKAGE='id.barangpas.linkpas'
 ACTIVITY='id.barangpas.linkpas/.LauncherActivity'
 
 adb install -r "$APK"
+adb reverse tcp:8765 tcp:8765
 adb shell am force-stop "$PACKAGE"
 
 TRIGGER_OUTPUT="$(adb shell am start -W -n "$ACTIVITY" --ez linkpas_native_diag_test true)"
