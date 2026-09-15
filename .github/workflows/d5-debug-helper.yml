@@ -6,12 +6,14 @@ on:
     paths:
       - 'LINKPAS-Debug.bat'
       - 'tests/debug-helper.test.js'
+      - 'tests/license.test.js'
       - '.github/workflows/d5-debug-helper.yml'
   push:
     branches: [main]
     paths:
       - 'LINKPAS-Debug.bat'
       - 'tests/debug-helper.test.js'
+      - 'tests/license.test.js'
       - '.github/workflows/d5-debug-helper.yml'
 
 permissions:
@@ -34,64 +36,71 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create bounded fake ADB
+      - name: Create bounded fake ADB executable
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force fakebin | Out-Null
-          @'
-          @echo off
-          if "%1"=="start-server" exit /b 0
-          if "%1"=="devices" (
-            echo List of devices attached
-            echo fake-device device
-            exit /b 0
-          )
-          if "%1"=="version" (
-            echo Android Debug Bridge version 1.0.41
-            exit /b 0
-          )
-          if "%1"=="get-state" (
-            echo device
-            exit /b 0
-          )
-          if "%1"=="shell" (
-            if "%2"=="pm" if "%3"=="path" (
-              echo package:/data/app/id.barangpas.linkpas/base.apk
-              exit /b 0
-            )
-            if "%2"=="pm" if "%3"=="get-app-links" (
-              echo id.barangpas.linkpas:
-              echo   linkpas.vercel.app: verified
-              exit /b 0
-            )
-            if "%2"=="dumpsys" if "%3"=="package" (
-              echo Package [id.barangpas.linkpas]
-              echo versionName=0.1.0-beta
-              echo versionCode=1
-              echo linkpas.vercel.app verified
-              echo com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity enabled=true
-              exit /b 0
-            )
-            if "%2"=="dumpsys" if "%3"=="activity" (
-              echo id.barangpas.linkpas linkpas.vercel.app
-              exit /b 0
-            )
-            if "%2"=="pidof" (
-              echo 1234
-              exit /b 0
-            )
-          )
-          if "%1"=="logcat" (
-            echo 09-15 00:00:00.000 1234 1234 I LINKPAS: id.barangpas.linkpas TrustedWebActivity
-            exit /b 0
-          )
-          exit /b 0
-          '@ | Set-Content -Encoding ascii fakebin\adb.cmd
+          $source = @'
+          using System;
+          public static class FakeAdb {
+            public static int Main(string[] args) {
+              if (args.Length == 0) return 0;
+              var command = args[0];
+              if (command == "start-server") return 0;
+              if (command == "devices") {
+                Console.WriteLine("List of devices attached");
+                Console.WriteLine("fake-device\tdevice");
+                return 0;
+              }
+              if (command == "version") {
+                Console.WriteLine("Android Debug Bridge version 1.0.41");
+                return 0;
+              }
+              if (command == "get-state") {
+                Console.WriteLine("device");
+                return 0;
+              }
+              if (command == "shell") {
+                if (args.Length >= 3 && args[1] == "pm" && args[2] == "path") {
+                  Console.WriteLine("package:/data/app/id.barangpas.linkpas/base.apk");
+                  return 0;
+                }
+                if (args.Length >= 3 && args[1] == "pm" && args[2] == "get-app-links") {
+                  Console.WriteLine("id.barangpas.linkpas:");
+                  Console.WriteLine("  linkpas.vercel.app: verified");
+                  return 0;
+                }
+                if (args.Length >= 3 && args[1] == "dumpsys" && args[2] == "package") {
+                  Console.WriteLine("Package [id.barangpas.linkpas]");
+                  Console.WriteLine("versionName=0.1.0-beta");
+                  Console.WriteLine("versionCode=1");
+                  Console.WriteLine("linkpas.vercel.app verified");
+                  Console.WriteLine("com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity enabled=true");
+                  return 0;
+                }
+                if (args.Length >= 3 && args[1] == "dumpsys" && args[2] == "activity") {
+                  Console.WriteLine("id.barangpas.linkpas linkpas.vercel.app");
+                  return 0;
+                }
+                if (args.Length >= 2 && args[1] == "pidof") {
+                  Console.WriteLine("1234");
+                  return 0;
+                }
+              }
+              if (command == "logcat") {
+                Console.WriteLine("09-15 00:00:00.000 1234 1234 I LINKPAS: id.barangpas.linkpas TrustedWebActivity");
+                return 0;
+              }
+              return 0;
+            }
+          }
+          '@
+          Add-Type -TypeDefinition $source -Language CSharp -OutputAssembly fakebin\adb.exe -OutputType ConsoleApplication
 
       - name: Run helper end-to-end with fake ADB
         shell: cmd
         env:
-          LINKPAS_ADB: ${{ github.workspace }}\fakebin\adb.cmd
+          LINKPAS_ADB: ${{ github.workspace }}\fakebin\adb.exe
           LINKPAS_NO_PAUSE: '1'
         run: call LINKPAS-Debug.bat
 
