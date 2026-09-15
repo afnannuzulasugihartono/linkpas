@@ -6,18 +6,22 @@ set "PACKAGE=id.barangpas.linkpas"
 set "HOST=linkpas.vercel.app"
 set "ADB=adb"
 
-where adb >nul 2>&1
-if errorlevel 1 (
-  if exist "%~dp0platform-tools\adb.exe" (
-    set "ADB=%~dp0platform-tools\adb.exe"
-  ) else if exist "%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe" (
-    set "ADB=%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe"
-  ) else (
-    echo.
-    echo ADB tidak ditemukan.
-    echo Instal Android Platform Tools atau letakkan folder platform-tools di samping file ini.
-    pause
-    exit /b 2
+if defined LINKPAS_ADB (
+  set "ADB=%LINKPAS_ADB%"
+) else (
+  where adb >nul 2>&1
+  if errorlevel 1 (
+    if exist "%~dp0platform-tools\adb.exe" (
+      set "ADB=%~dp0platform-tools\adb.exe"
+    ) else if exist "%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe" (
+      set "ADB=%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe"
+    ) else (
+      echo.
+      echo ADB tidak ditemukan.
+      echo Instal Android Platform Tools atau letakkan folder platform-tools di samping file ini.
+      if not defined LINKPAS_NO_PAUSE pause
+      exit /b 2
+    )
   )
 )
 
@@ -43,7 +47,7 @@ if not "!DEVICE_COUNT!"=="1" (
   echo.
   echo Sambungkan tepat satu perangkat Android, izinkan USB debugging, lalu jalankan ulang.
   echo Folder diagnostik awal: "%OUT%"
-  pause
+  if not defined LINKPAS_NO_PAUSE pause
   exit /b 3
 )
 
@@ -103,7 +107,7 @@ if exist "%ZIP%" (
   echo "%ZIP%"
   echo.
   echo Kirim ZIP tersebut ke ChatGPT lalu tulis: cek LINKPAS
-  pause
+  if not defined LINKPAS_NO_PAUSE pause
   exit /b 0
 )
 
@@ -111,5 +115,5 @@ echo.
 echo Pengumpulan selesai, tetapi ZIP gagal dibuat.
 echo Folder hasil tetap tersedia di:
 echo "%OUT%"
-pause
+if not defined LINKPAS_NO_PAUSE pause
 exit /b 4
