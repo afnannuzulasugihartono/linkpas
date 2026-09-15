@@ -1,12 +1,12 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "READY",
+  "status": "BLOCKED",
   "current_checkpoint": "D4a",
   "last_completed_checkpoint": "D3",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3"],
-  "next_action": "Implement Android/TWA native diagnostics and verify tests/release build according to docs/APK_CHECKPOINTS.md D4a.",
-  "blocker": null,
+  "next_action": "Recheck PR #5 CI. When Android Release APK and Android Debug APK are no longer queued/running, inspect results. If tests and release build pass, merge PR #5, complete D4a, and advance to D4b.",
+  "blocker": "D4a validation is waiting on required GitHub Actions runs 34916588751 (Android Release APK) and 34916588702 (Android Debug APK), both queued at the validation gate.",
   "roadmap_revision": {
     "reason": "D4 was split before implementation because Android runtime/emulator validation plus build verification cannot be bounded reliably inside one 18-minute checkpoint.",
     "inserted_before": "A6",
@@ -14,26 +14,32 @@
     "resume_after_diagnostics": "A6",
     "privacy_rule": "Do not collect affiliate-link contents, clipboard contents, buyer email, raw license keys, passwords, device identifiers, or other user content by default."
   },
-  "last_checkpoint_evidence": {
-    "checkpoint": "D3",
-    "result": "COMPLETE",
-    "implementation_commit": "92f5357dbf9ae1aee629ccf0f041c62868cda5ae",
-    "gesture_fix_commit": "322d0c23535dd1cacfab723be83742eeb55c5859",
-    "production_deployment_id": "dpl_HPUDTpnfq7R8YFn1mnyRjg4W9sCR",
-    "production_deployment_state": "READY",
-    "normal_load_panel_hidden": true,
-    "hidden_entry": "Five cumulative clicks on v0.1.0-beta version label",
-    "hidden_entry_verified": true,
-    "manual_report_id": "f1145270-67b4-4c14-b793-5180bad16370",
-    "manual_report_supabase_readback": true,
-    "normal_workflow_after_panel": {
-      "processed": 7,
-      "unique": 6,
-      "duplicates": 1,
-      "shortlinks": 4,
-      "page_remained_usable": true
-    },
-    "remaining_blocker": null
+  "in_progress_checkpoint_evidence": {
+    "checkpoint": "D4a",
+    "result": "WAITING_FOR_CI",
+    "branch": "diag/d4a-native",
+    "pr": 5,
+    "pr_head_sha": "859382890d7575ea9fd325d8f360d3506eb96232",
+    "native_components": [
+      "NativeDiagnostics.java",
+      "NativeDiagnosticTransport.java",
+      "NativeDiagnosticSanitizer.java"
+    ],
+    "launcher_integration": true,
+    "internet_permission_added": true,
+    "pending_crash_persistence": "app-private SharedPreferences with retry on next startup",
+    "controlled_beta_trigger": "Android intent extra linkpas_native_diag_test=true",
+    "privacy": "No service-role key, signing secret, clipboard content, affiliate-link content, license value, email, or device identifier intentionally collected.",
+    "unit_tests": [
+      "sanitizer redacts email/url/token patterns",
+      "transport failure returns null without throwing",
+      "missing transport configuration returns null"
+    ],
+    "release_workflow_run_id": 34916588751,
+    "release_workflow_status": "queued",
+    "debug_workflow_run_id": 34916588702,
+    "debug_workflow_status": "queued",
+    "runtime_supabase_validation_deferred_to": "D4b"
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
