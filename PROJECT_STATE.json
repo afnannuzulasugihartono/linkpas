@@ -1,12 +1,12 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "BLOCKED",
-  "current_checkpoint": "D4b",
-  "last_completed_checkpoint": "D4a",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a"],
-  "next_action": "Instrument only the D4b controlled-test path with bounded local lifecycle markers before enqueue, at diagnostic thread start, and after transport returns. Rerun once to distinguish trigger-dispatch/process-lifetime failure from transport failure. Do not change normal async behavior and do not advance to D5 until an exact source=android report ID is read back from Supabase.",
-  "blocker": "The fully instrumented D4b runtime retry installs and launches LINKPAS successfully, but after 30 seconds neither last_report_id nor last_transport_error is persisted, and Supabase still has zero source=android rows. Because the transport layer now persists a bounded result whenever post() returns, the current evidence shows the controlled send does not reach an observable transport completion; exact lifecycle point is not yet proven.",
+  "status": "READY",
+  "current_checkpoint": "D5",
+  "last_completed_checkpoint": "D4b",
+  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b"],
+  "next_action": "Execute D5 only: validate the end-to-end LINKPAS Beta failure -> Supabase report -> ChatGPT/Supabase inspection workflow, define operational semantics for `cek LINKPAS`, and add the bounded Windows ADB fallback helper required by the roadmap. Do not start A6 in the same turn.",
+  "blocker": null,
   "roadmap_revision": {
     "reason": "D4 was split before implementation because Android runtime/emulator validation plus build verification cannot be bounded reliably inside one 18-minute checkpoint.",
     "inserted_before": "A6",
@@ -14,57 +14,53 @@
     "resume_after_diagnostics": "A6",
     "privacy_rule": "Do not collect affiliate-link contents, clipboard contents, buyer email, raw license keys, passwords, device identifiers, or other user content by default."
   },
-  "in_progress_checkpoint_evidence": {
+  "last_checkpoint_evidence": {
     "checkpoint": "D4b",
-    "result": "BLOCKED_RUNTIME_LIFECYCLE",
+    "result": "PASS",
     "validation_pr": 6,
-    "validation_branch": "ci/d4b-runtime-validation",
-    "validation_head_sha": "6ae9df301cdfffccf4d36771f36185fc2bb448ec",
+    "validation_pr_disposition": "closed unmerged after validation-only harness completed",
+    "product_pr": 7,
+    "product_merge_sha": "f0e969b8f437d642bdd955664e8dfa7e1eec254d",
     "runtime": "Android emulator API 35 google_apis x86_64",
-    "attempts": [
-      {
-        "run_id": 34916930889,
-        "result": "failure",
-        "cause": "validation harness used set -o pipefail under /usr/bin/sh before app runtime commands executed"
-      },
-      {
-        "run_id": 34917106786,
-        "result": "failure",
-        "cause": "emulator-runner executed multiline script entries in separate sh processes, so APK/PACKAGE/ACTIVITY variables did not persist"
-      },
-      {
-        "run_id": 34917324572,
-        "result": "failure",
-        "cause": "actual runtime path reached: APK install succeeded and LauncherActivity returned Status: ok, but no diagnostic report ID appeared within 30 seconds"
-      },
-      {
-        "run_id": 34917855990,
-        "result": "failure_with_new_evidence",
-        "cause": "bounded transport-result instrumentation was active; APK install and LauncherActivity Status: ok succeeded, but neither last_report_id nor last_transport_error appeared within 30 seconds; workflow emitted D4B_TRANSPORT_ERROR=no_result_after_30s"
-      }
-    ],
+    "final_runtime_run_id": 34922418793,
+    "final_runtime_result": "success",
     "runtime_build": "PASS",
     "runtime_install": "PASS",
     "controlled_trigger_activity_launch": "PASS; Status: ok",
-    "bounded_transport_instrumentation": {
-      "scope": "validation branch only",
-      "success_marker": "last_report_id",
-      "failure_marker": "last_transport_error",
-      "allowed_failure_codes": "missing_config, http_<status>, missing_report_id, bounded exception class name",
-      "response_body_logged": false,
-      "endpoint_or_key_logged": false,
-      "user_payload_logged": false
+    "controlled_lifecycle": "transport_returned",
+    "runtime_report_id": "fd0b0540-45da-4f63-ae17-6580cffc47b3",
+    "supabase_readback": {
+      "verified": true,
+      "source": "android",
+      "error_type": "native_controlled_test",
+      "app_version": "0.1.0-beta",
+      "build_version": "1",
+      "package_name": "id.barangpas.linkpas",
+      "platform": "android",
+      "platform_version": "sdk-35",
+      "browser": "com.android.chrome",
+      "page": "https://linkpas.vercel.app/",
+      "breadcrumb_state": "controlled_test",
+      "technical_metadata_only": true
     },
-    "latest_runtime_result": "no_result_after_30s",
-    "normal_product_crash_observed": false,
-    "runtime_report_id": null,
-    "runtime_transport_error": null,
-    "supabase_source_android_rows": 0,
-    "supabase_readback": false,
-    "hypothesis_not_proven": "The background diagnostic send may not reach completion across the TWA launcher lifecycle, but a lifecycle marker is required before treating this as root cause.",
-    "harness_fixes_are_validation_only": true,
-    "privacy": "No personal data, license values, affiliate-link contents, clipboard contents, signing secrets, credentials, endpoint/key values, response bodies, or device identifiers were intentionally emitted by the validation instrumentation.",
-    "remaining_blocker": "Need bounded lifecycle markers to identify whether the controlled send is enqueued, whether the worker thread starts, and whether NativeDiagnosticTransport.post returns before another code change is justified."
+    "normal_launch_after_diagnostics": "PASS; Status: ok; D4B_NORMAL_LAUNCH_FATAL=none",
+    "root_causes_resolved": [
+      "The controlled diagnostic thread could outlive the Android Browser Helper LauncherActivity TWA handoff. The Beta controlled-test path now delays TWA launch only until diagnostic completion or a hard 5-second maximum, while normal launch remains immediate.",
+      "Android Browser Helper 2.7.3 launch attempted to enable ManageDataLauncherActivity, but that component was absent from the manifest. The standard TWA manage-space activity declaration was added."
+    ],
+    "product_ci": {
+      "debug_run_id": 34922729050,
+      "debug_result": "success",
+      "release_run_id": 34922728954,
+      "release_result": "success"
+    },
+    "privacy": "Validated Android report contains sanitized technical metadata only. No personal data, affiliate-link contents, clipboard contents, raw license values, signing secrets, credentials, or device identifiers were intentionally collected or stored.",
+    "non_blocking": "D4a tests cover transport failure as non-throwing; D4b normal startup remained usable after diagnostics initialization and the controlled test has a 5-second hard launch deadline.",
+    "adb_logcat_limitations": [
+      "Native telemetry can observe wrapper startup, selected browser, controlled/native exceptions, and diagnostic transport state, but it cannot prove verified TWA/fullscreen rendering versus browser/custom-tab fallback.",
+      "Digital Asset Links/App Links verification state and browser-side TWA verification failures may still require adb shell dumpsys/package domain verification and logcat.",
+      "Failures that terminate the wrapper before pending crash persistence or before diagnostics initialization may still require ADB/logcat."
+    ]
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
