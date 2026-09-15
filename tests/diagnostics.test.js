@@ -9,6 +9,7 @@ function loadDiagnostics({ fetchImpl, probeId = null }) {
   const context = {
     console,
     Error,
+    Promise,
     URLSearchParams,
     setTimeout,
     clearTimeout,
@@ -34,6 +35,7 @@ function loadDiagnostics({ fetchImpl, probeId = null }) {
         diagnosticsPublishableKey: 'test-publishable-key',
         appVersion: '0.1.0-beta',
         buildVersion: '1',
+        diagnosticsAutoRetryDelays: [0],
       },
       LinkPasLaunchProbe: { currentProbeId: probeId },
       addEventListener(type, handler) {
@@ -87,4 +89,46 @@ test('correlated launch probe emits automatically without manual diagnostics act
   assert.equal(payloads[0].diagnostics.probe_id, probeId);
   assert.equal(payloads[0].diagnostics.app_stage, 'pwa_launch_probe');
   assert.equal(payloads[0].service_worker_state, 'available_not_controlling');
+});
+
+test('startup without native probe emits an automatic diagnostic beacon', async () => {
+  const payloads = [];
+  loadDiagnostics({
+    fetchImpl: async (_url, init) => {
+      payloads.push(JSON.parse(init.body));
+      return { ok: true, status: 201, json: async () => ({ report_id: 'startup-report' }) };
+    },
+  });
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(payloads.length, 1);
+  assert.equal(payloads[0].error_type, 'pwa_startup_no_probe');
+  assert.equal(payloads[0].diagnostics.app_stage, 'pwa_startup_no_probe');
+  assert.equal(payloads[0].diagnostics.probe_source, 'missing_or_non_native_launch');
+  assert.equal(payloads[0].diagnostics.probe_id, undefined);
+});
+
+test('concurrent diagnostic reports are serialized instead of dropped', async () => {
+  const payloads = [];
+  let releaseFirst;
+  const firstGate = new Promise((resolve) => { releaseFirst = resolve; });
+  let call = 0;
+  const { api } = loadDiagnostics({
+    probeId: '123e4567-e89b-42d3-a456-426614174000',
+    fetchImpl: async (_url, init) => {
+      call += 1;
+      payloads.push(JSON.parse(init.body));
+      if (call === 1) await firstGate;
+      return { ok: true, status: 201, json: async () => ({ report_id: `r${call}` }) };
+    },
+  });
+
+  const manual = api.report({ errorType: 'second_report' });
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(payloads.length, 1);
+  releaseFirst();
+  await manual;
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(payloads.length, 2);
+  assert.equal(payloads[0].error_type, 'pwa_launch_probe');
+  assert.equal(payloads[1].error_type, 'second_report');
 });
