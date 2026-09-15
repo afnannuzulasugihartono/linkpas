@@ -42,6 +42,21 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      - name: Resolve runner DNS for emulator
+        id: runner_dns
+        shell: bash
+        run: |
+          DNS="$(awk '/^nameserver[[:space:]]+/{print $2; exit}' /etc/resolv.conf)"
+          if [[ -z "$DNS" ]]; then
+            echo 'No runner DNS resolver found.' >&2
+            exit 1
+          fi
+          if [[ "$DNS" == 127.* ]]; then
+            DNS='10.0.2.2'
+          fi
+          echo "server=$DNS" >> "$GITHUB_OUTPUT"
+          echo "D4B_EMULATOR_DNS=$DNS"
+
       - name: Run controlled native diagnostic on Android emulator
         id: runtime
         uses: reactivecircus/android-emulator-runner@v2
@@ -51,7 +66,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -dns-server 8.8.8.8,1.1.1.1
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -dns-server ${{ steps.runner_dns.outputs.server }}
           script: bash .github/scripts/d4b-runtime.sh
 
       - name: Upload D4b report ID evidence
