@@ -72,7 +72,7 @@ final class NativeDiagnosticTransport {
     }
 
     static String withCurrentLaunchProbe(String payload) {
-        String probeId = LaunchProbeId.current();
+        String currentProbe = LaunchProbeId.current();
         if (payload == null || payload.isEmpty()) return payload;
         try {
             JSONObject root = new JSONObject(payload);
@@ -86,10 +86,11 @@ final class NativeDiagnosticTransport {
                 diagnostics = new JSONObject();
                 root.put("diagnostics", diagnostics);
             }
-            // A queued payload must retain the probe from the launch that created it.
             String existingProbe = diagnostics.optString("probe_id", "");
-            if (LaunchProbeId.isValid(existingProbe)) return root.toString();
-            if (LaunchProbeId.isValid(probeId)) diagnostics.put("probe_id", probeId);
+            String selectedProbe = LaunchProbeId.preferExisting(existingProbe, currentProbe);
+            if (selectedProbe != null && !selectedProbe.equals(existingProbe)) {
+                diagnostics.put("probe_id", selectedProbe);
+            }
             return root.toString();
         } catch (Exception ignored) {
             return payload;
