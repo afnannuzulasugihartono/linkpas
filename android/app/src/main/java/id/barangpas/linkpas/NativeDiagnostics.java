@@ -29,18 +29,24 @@ final class NativeDiagnostics {
 
     private NativeDiagnostics() {}
 
+    static boolean isControlledTest(Intent launchIntent) {
+        return BuildConfig.VERSION_NAME.contains("-beta")
+                && launchIntent != null
+                && launchIntent.getBooleanExtra("linkpas_native_diag_test", false);
+    }
+
     static void install(Context context, Intent launchIntent) {
         Context app = context.getApplicationContext();
         markStage(app, "launcher_init");
         installCrashHandler(app);
         flushPendingAsync(app);
-        if (BuildConfig.VERSION_NAME.contains("-beta")
-                && launchIntent != null
-                && launchIntent.getBooleanExtra("linkpas_native_diag_test", false)) {
-            markControlledTestLifecycle(app, "send_enqueued");
-            emitAsync(app, buildPayload(app, launchIntent, "native_controlled_test",
-                    "Controlled Android diagnostics event", null, "controlled_test"), true);
-        }
+    }
+
+    static void emitControlledTestAsync(Context context, Intent launchIntent, Runnable completion) {
+        Context app = context.getApplicationContext();
+        markControlledTestLifecycle(app, "send_enqueued");
+        emitAsync(app, buildPayload(app, launchIntent, "native_controlled_test",
+                "Controlled Android diagnostics event", null, "controlled_test"), true, completion);
     }
 
     static void markStage(Context context, String stage) {
@@ -111,24 +117,34 @@ final class NativeDiagnostics {
         }, "linkpas-diag-flush").start();
     }
 
-    private static void emitAsync(Context context, String payload, boolean controlledTest) {
+    private static void emitAsync(Context context, String payload, boolean controlledTest, Runnable completion) {
         new Thread(() -> {
-            if (controlledTest) markControlledTestLifecycle(context, "send_thread_started");
-            String reportId = NativeDiagnosticTransport.post(
-                    BuildConfig.DIAGNOSTICS_ENDPOINT,
-                    BuildConfig.DIAGNOSTICS_PUBLISHABLE_KEY,
-                    payload);
-            if (controlledTest) markControlledTestLifecycle(context, "transport_returned");
             try {
-                SharedPreferences.Editor editor = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
-                if (reportId != null) {
-                    editor.remove(KEY_LAST_TRANSPORT_ERROR).putString(KEY_LAST_REPORT, reportId).apply();
-                } else {
-                    editor.putString(KEY_LAST_TRANSPORT_ERROR,
-                            NativeDiagnosticSanitizer.redact(NativeDiagnosticTransport.getLastFailureCode(), 80)).apply();
+                if (controlledTest) markControlledTestLifecycle(context, "send_thread_started");
+                String reportId = NativeDiagnosticTransport.post(
+                        BuildConfig.DIAGNOSTICS_ENDPOINT,
+                        BuildConfig.DIAGNOSTICS_PUBLISHABLE_KEY,
+                        payload);
+                if (controlledTest) markControlledTestLifecycle(context, "transport_returned");
+                try {
+                    SharedPreferences.Editor editor = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
+                    if (reportId != null) {
+                        editor.remove(KEY_LAST_TRANSPORT_ERROR).putString(KEY_LAST_REPORT, reportId).commit();
+                    } else {
+                        editor.putString(KEY_LAST_TRANSPORT_ERROR,
+                                NativeDiagnosticSanitizer.redact(NativeDiagnosticTransport.getLastFailureCode(), 80)).commit();
+                    }
+                } catch (Exception ignored) {
+                    // Reporting state must not affect app flow.
                 }
-            } catch (Exception ignored) {
-                // Reporting state must not affect app flow.
+            } finally {
+                if (completion != null) {
+                    try {
+                        completion.run();
+                    } catch (Exception ignored) {
+                        // Completion is best effort and must not crash diagnostics.
+                    }
+                }
             }
         }, "linkpas-diag-send").start();
     }
