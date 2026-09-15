@@ -1,12 +1,12 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "READY",
+  "status": "BLOCKED",
   "current_checkpoint": "D4b",
   "last_completed_checkpoint": "D4a",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a"],
-  "next_action": "Run the controlled native Android diagnostic trigger on an Android runtime, verify the source=android report in Supabase, confirm startup remains usable, and document ADB/logcat-only limitations according to D4b.",
-  "blocker": null,
+  "next_action": "Recheck D4b runtime validation PR #6 / workflow run 34916930889. When terminal, inspect the emulator result and report-ID artifact; if successful, read the exact source=android report from Supabase, document ADB/logcat-only limitations, close the validation PR unmerged, complete D4b, and advance to D5.",
+  "blocker": "Required Android emulator validation workflow run 34916930889 for PR #6 is queued at the D4b validation gate.",
   "roadmap_revision": {
     "reason": "D4 was split before implementation because Android runtime/emulator validation plus build verification cannot be bounded reliably inside one 18-minute checkpoint.",
     "inserted_before": "A6",
@@ -14,41 +14,21 @@
     "resume_after_diagnostics": "A6",
     "privacy_rule": "Do not collect affiliate-link contents, clipboard contents, buyer email, raw license keys, passwords, device identifiers, or other user content by default."
   },
-  "last_checkpoint_evidence": {
-    "checkpoint": "D4a",
-    "result": "COMPLETE",
-    "pr": 5,
-    "branch": "diag/d4a-native",
-    "pr_head_sha": "859382890d7575ea9fd325d8f360d3506eb96232",
-    "merge_sha": "7cacedd1365235f89ba05f9346e516e92cf9fb14",
-    "native_components": [
-      "NativeDiagnostics.java",
-      "NativeDiagnosticTransport.java",
-      "NativeDiagnosticSanitizer.java"
-    ],
-    "launcher_integration": true,
-    "internet_permission_added": true,
-    "pending_crash_persistence": "app-private SharedPreferences with retry on next startup",
-    "controlled_beta_trigger": "Android intent extra linkpas_native_diag_test=true",
-    "privacy": "No service-role key, signing secret, clipboard content, affiliate-link content, license value, email, or device identifier intentionally collected by Android diagnostics.",
-    "unit_tests": [
-      "sanitizer redacts email/url/token patterns",
-      "transport failure returns null without throwing",
-      "missing transport configuration returns null"
-    ],
-    "release_workflow_run_id": 34916588751,
-    "release_workflow_job_id": 104215424586,
-    "release_workflow_conclusion": "success",
-    "release_unit_test_step": "success",
-    "release_build_step": "success",
-    "release_artifact_id": 10376336565,
-    "release_artifact_name": "linkpas-release-unsigned",
-    "release_artifact_digest": "sha256:88e4fb859267f90600d5f9d0ad3ee4473b40aef5d139225d140cac8b88a1e8ff",
-    "debug_workflow_run_id": 34916588702,
-    "debug_workflow_job_id": 104215424520,
-    "debug_workflow_conclusion": "success",
-    "runtime_supabase_validation_deferred_to": "D4b",
-    "remaining_blocker": null
+  "in_progress_checkpoint_evidence": {
+    "checkpoint": "D4b",
+    "result": "WAITING_FOR_RUNTIME_CI",
+    "validation_pr": 6,
+    "validation_branch": "ci/d4b-runtime-validation",
+    "validation_head_sha": "f6ad17b4cf7ff458be2ce969d98e9e1c1ad01bf2",
+    "workflow": ".github/workflows/android-d4b-runtime.yml",
+    "workflow_run_id": 34916930889,
+    "workflow_status": "queued",
+    "runtime": "Android emulator API 35 google_apis x86_64",
+    "controlled_trigger": "adb shell am start -W -n id.barangpas.linkpas/.LauncherActivity --ez linkpas_native_diag_test true",
+    "evidence_plan": "Poll app-private last_report_id via run-as, upload only d4b-report-id.txt, then verify a normal launch returns Status: ok without LINKPAS fatal exception.",
+    "privacy": "Validation enters no personal data or license values and uploads only the diagnostic report ID.",
+    "supabase_readback": false,
+    "runtime_supabase_report_id": null
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
