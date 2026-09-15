@@ -1,44 +1,71 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "READY",
-  "current_checkpoint": "A8",
-  "last_completed_checkpoint": "A7",
+  "status": "COMPLETE",
+  "current_checkpoint": null,
+  "last_completed_checkpoint": "A8",
   "completed_checkpoints": [
     "A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5",
-    "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b", "A6c", "A7"
+    "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b", "A6c", "A7", "A8"
   ],
-  "next_action": "Execute A8 only according to docs/APK_CHECKPOINTS.md. Publish the verified signed LINKPAS 0.1.0-beta.2 / code 2 APK Beta artifact to a stable distribution location, include release notes plus the recorded SHA-256 checksum, verify production web remains healthy, and mark APK_BETA complete only after publication evidence is confirmed. Do not perform work beyond A8.",
+  "next_action": "APK_BETA milestone complete. No further checkpoint is defined in docs/APK_CHECKPOINTS.md.",
   "blocker": null,
   "last_checkpoint_evidence": {
-    "checkpoint": "A7",
+    "checkpoint": "A8",
     "result": "PASS",
-    "verdict": "VERIFIED_NO_OP",
+    "verdict": "APK_BETA_PUBLISHED",
     "artifact": {
-      "filename": "LINKPAS-v0.1.0-beta.2-rc.apk",
+      "filename": "LINKPAS-v0.1.0-beta.2.apk",
       "sha256": "64d87aa2cef249a1bd923e74edff18128260a7c6aa6ed9b02078a17f64707f27",
+      "size_bytes": 3814288,
       "package": "id.barangpas.linkpas",
       "version_name": "0.1.0-beta.2",
-      "version_code": 2
+      "version_code": 2,
+      "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6"
     },
-    "acceptance_review": {
+    "distribution": {
+      "type": "ChatGPT Library persistent release folder",
+      "folder": "/LINKPAS Releases/v0.1.0-beta.2",
+      "directory_id": "6aa950840bd88191abe5370a2d6f313a",
+      "apk": {
+        "path": "/LINKPAS Releases/v0.1.0-beta.2/LINKPAS-v0.1.0-beta.2.apk",
+        "file_id": "file_0000000004ec820d8e4f2fd4e0cb5e9c",
+        "library_file_id": "libfile_ee37b94130c8819183fb9bee2fa71e1e"
+      },
+      "release_notes": {
+        "path": "/LINKPAS Releases/v0.1.0-beta.2/RELEASE_NOTES.md",
+        "file_id": "file_0000000012bc81f7af2d23dd02e2a357",
+        "library_file_id": "libfile_11810c79c8888191b218f53845457674"
+      },
+      "checksums": {
+        "path": "/LINKPAS Releases/v0.1.0-beta.2/SHA256SUMS.txt",
+        "file_id": "file_000000009f7881f5ae6c1196b353fb06",
+        "library_file_id": "libfile_f3a8b33fcaf4819199801ed3df26d927"
+      },
+      "github_release_note": "The connected GitHub tool does not expose release-asset upload/write actions, so A8 used a persistent Library release folder rather than creating an incomplete GitHub Release without the APK."
+    },
+    "publication_verification": {
+      "library_apk_materialized_back": true,
+      "library_apk_sha256": "64d87aa2cef249a1bd923e74edff18128260a7c6aa6ed9b02078a17f64707f27",
+      "byte_for_byte_match_with_verified_rc": true,
+      "release_notes_present": true,
+      "sha256sums_present": true
+    },
+    "acceptance_history": {
       "A6a2e": "PASS_VERIFIED_TWA",
       "A6b": "PASS online core acceptance",
       "A6c": "PASS offline core acceptance",
-      "release_blockers_remaining": 0
+      "A7": "VERIFIED_NO_OP; release blockers remaining = 0"
     },
-    "repository_reality": {
-      "beta2_product_merge_sha": "26b82aff33d2b59d9845b463133263f58951fcac",
-      "main_before_a7_state_update": "dd42955641a1862048cf3d74e749ca33a058ff37",
-      "changes_since_beta2_product_merge": ["PROJECT_STATE.json"],
-      "product_or_android_source_drift": false,
-      "open_pull_requests": 0
+    "production_health": {
+      "root_http_status": 200,
+      "manifest_http_status": 200,
+      "service_worker_http_status": 200,
+      "service_worker_cache_generation": "linkpas-pwa-v6",
+      "assetlinks_http_status": 200,
+      "assetlinks_package": "id.barangpas.linkpas",
+      "assetlinks_certificate_matches_release": true
     },
-    "telemetry_review": {
-      "new_runtime_or_fetch_errors_after_a6c_start": false
-    },
-    "code_changes": "none",
-    "rebuild_required": false,
     "remaining_blocker": null
   },
   "continuation_semantics": {
@@ -46,7 +73,6 @@
     "checkpoints_per_turn": 1,
     "target_timebox_minutes": 15,
     "hard_timebox_minutes": 18,
-    "must_finish_under_minutes": 20,
     "must_split_before_execution_if_too_large": true,
     "must_update_state_after_checkpoint": true,
     "must_stop_before_next_checkpoint": true
