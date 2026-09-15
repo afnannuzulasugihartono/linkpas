@@ -2,13 +2,14 @@
 import socket
 import sys
 
-if len(sys.argv) != 2:
-    raise SystemExit("usage: d4b-dns-proxy.py <upstream-ip>")
+if len(sys.argv) != 3:
+    raise SystemExit("usage: d4b-dns-proxy.py <bind-ip> <upstream-ip>")
 
-upstream = sys.argv[1]
+bind_ip = sys.argv[1]
+upstream = sys.argv[2]
 listen = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 listen.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-listen.bind(("127.0.0.1", 53))
+listen.bind((bind_ip, 53))
 
 while True:
     packet, client = listen.recvfrom(4096)
