@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/android-d4b-runtime.yml'
       - '.github/scripts/d4b-runtime.sh'
+      - '.github/scripts/d4b-dns-proxy.py'
       - 'android/app/src/main/java/id/barangpas/linkpas/NativeDiagnostics.java'
       - 'android/app/src/main/java/id/barangpas/linkpas/NativeDiagnosticTransport.java'
 
@@ -42,20 +43,18 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Resolve runner DNS for emulator
-        id: runner_dns
+      - name: Bridge runner DNS to emulator
         shell: bash
         run: |
-          DNS="$(awk '/^nameserver[[:space:]]+/{print $2; exit}' /etc/resolv.conf)"
-          if [[ -z "$DNS" ]]; then
+          UPSTREAM="$(awk '/^nameserver[[:space:]]+/{print $2; exit}' /etc/resolv.conf)"
+          if [[ -z "$UPSTREAM" ]]; then
             echo 'No runner DNS resolver found.' >&2
             exit 1
           fi
-          if [[ "$DNS" == 127.* ]]; then
-            DNS='10.0.2.2'
-          fi
-          echo "server=$DNS" >> "$GITHUB_OUTPUT"
-          echo "D4B_EMULATOR_DNS=$DNS"
+          echo "D4B_DNS_UPSTREAM=$UPSTREAM"
+          sudo sh -c "nohup python3 '$GITHUB_WORKSPACE/.github/scripts/d4b-dns-proxy.py' '$UPSTREAM' >/tmp/d4b-dns-proxy.log 2>&1 &"
+          sleep 1
+          sudo ss -lunp | grep -q '127.0.0.1:53'
 
       - name: Run controlled native diagnostic on Android emulator
         id: runtime
@@ -66,7 +65,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -dns-server ${{ steps.runner_dns.outputs.server }}
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -dns-server 10.0.2.2
           script: bash .github/scripts/d4b-runtime.sh
 
       - name: Upload D4b report ID evidence
