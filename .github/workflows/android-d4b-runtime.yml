@@ -48,6 +48,13 @@ jobs:
       - name: Start validation-only Supabase relay
         shell: bash
         run: |
+          STATUS="$(curl -sS --connect-timeout 5 --max-time 10 -o /dev/null -w '%{http_code}' \
+            -X POST 'https://ignmxvommfnkllcpliuw.supabase.co/functions/v1/linkpas-diagnostics' \
+            -H 'Content-Type: application/json' \
+            -H 'apikey: d4b-invalid-preflight-key' \
+            --data '{"source":"test"}' || true)"
+          echo "D4B_UPSTREAM_PREFLIGHT_HTTP=$STATUS"
+          test "$STATUS" = '401'
           nohup python3 .github/scripts/d4b-http-relay.py >/tmp/d4b-http-relay.log 2>&1 &
           sleep 1
           python3 - <<'PY'
