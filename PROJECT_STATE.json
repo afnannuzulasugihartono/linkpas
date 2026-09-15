@@ -1,14 +1,14 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "BLOCKED",
-  "current_checkpoint": "A6a2c",
-  "last_completed_checkpoint": "A6a2b",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b"],
-  "next_action": "Resume A6a2c at the CI gate only: verify Web Tests, Android Debug APK, and Android Release APK for PR #11 head 09e6114e7f145dca4b1dcca001e2935847819ffe. If all required checks are successful, merge PR #11, record A6a2c evidence, advance current_checkpoint to A6a2d, and stop without executing A6a2d.",
-  "blocker": "Required A6a2c CI is still running: Android Debug APK run 34943098305 and Android Release APK run 34943098218 are in_progress. Web Tests run 34943098287 is already successful. Do not merge or advance until both Android runs complete successfully.",
+  "status": "READY",
+  "current_checkpoint": "A6a2d",
+  "last_completed_checkpoint": "A6a2c",
+  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c"],
+  "next_action": "Execute A6a2d only according to docs/A6A_SUBCHECKPOINTS.md: build a release candidate containing the accepted A6a2a-c verification instrumentation, sign it with the existing A4 release identity outside Git, verify package/version, APK signature and published certificate fingerprint, checksum, and presence of the automatic self-check/probe implementation. Keep signing secrets outside Git/logs. Do not start A6a2e in the same turn.",
+  "blocker": null,
   "roadmap_revision": {
-    "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit in one 18-minute checkpoint.",
+    "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit inside one 18-minute checkpoint.",
     "a6_subcheckpoints": ["A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b", "A6c"],
     "a6a1": "rebuild and cryptographically verify the current signed release candidate",
     "a6a2a": "native signer/App Links/browser-TWA-capability self-check primitives",
@@ -24,31 +24,44 @@
     "privacy_rule": "Use synthetic/non-sensitive test data only; probe IDs must be random technical IDs with no user data; keep signing key/password outside Git and logs; diagnostics collect technical metadata only."
   },
   "last_checkpoint_evidence": {
-    "checkpoint": "A6a2b",
+    "checkpoint": "A6a2c",
     "result": "PASS",
-    "product_pr": 10,
-    "product_merge_sha": "8fc16949e91756c5273321094784f53a764f1a1e",
-    "validation_head_sha": "abc03c83f40501b6be9fb27f73d628bfddafaa3f",
+    "product_pr": 11,
+    "product_merge_sha": "66643df37e46ebf835d442e0c9b6d9d5de996019",
+    "validation_head_sha": "09e6114e7f145dca4b1dcca001e2935847819ffe",
     "ci": {
-      "debug_run_id": 34940896194,
+      "web_run_id": 34943098287,
+      "web_build": "success",
+      "web_tests": "success",
+      "debug_run_id": 34943098305,
       "debug_build": "success",
-      "release_run_id": 34940896168,
+      "release_run_id": 34943098218,
       "android_unit_tests": "success",
       "unsigned_release_build": "success"
     },
-    "browser_dal_and_fallback": {
-      "provider_binding": "Uses the actual Android Browser Helper TWA provider package selected by TwaLauncher and binds Custom Tabs validation to that provider.",
-      "dal_relationship": "Requests RELATION_HANDLE_ALL_URLS validation for https://linkpas.vercel.app and preserves callback true, callback false, and no-callback/unavailable evidence as distinct states.",
-      "timeout_policy": "A missing browser callback times out to inconclusive; timeout is never promoted to false or pass.",
-      "fallback_observability": "Wraps the existing Android Browser Helper fallback strategy and emits fallback_invoked evidence before delegating to the actual fallback launch.",
-      "diagnostics": "Beta-only native_twa_evidence is sent through the existing best-effort diagnostics transport without changing normal user-facing workflow.",
-      "privacy": "Evidence contains bounded technical provider/relationship/fallback state only; no user content, clipboard data, affiliate-link contents, signing material, credentials, or device identifiers are collected."
+    "supabase": {
+      "diagnostics_edge_function": "linkpas-diagnostics",
+      "version": 3,
+      "status": "ACTIVE",
+      "correlation_metadata_allowlist": "Probe ID plus bounded A6a2a/A6a2b signer/App Links/browser DAL/fallback technical evidence is retained; invalid probe IDs are discarded."
+    },
+    "automatic_probe_correlation": {
+      "probe_generation": "Beta Android wrapper generates a random UUID launch probe kept as technical correlation data only.",
+      "pwa_history_cleanup": "PWA captures a valid probe and immediately removes the probe parameter from visible URL/history before normal runtime continues.",
+      "automatic_pwa_report": "Valid launch probes automatically emit a sanitized PWA runtime report without requiring the manual diagnostics button.",
+      "native_correlation": "Native self-check and browser TWA evidence attach the same launch probe ID so Android and PWA evidence can be correlated in Supabase.",
+      "verdict_policy": "Deterministic PASS_VERIFIED_TWA, FAIL_FALLBACK, FAIL_DAL, INCONCLUSIVE, and NEEDS_ADB rules are present; timeout/unknown evidence is never promoted to PASS.",
+      "privacy": "Probe is a bounded random technical UUID and no affiliate-link content, clipboard content, buyer email, license value, signing material, credentials, or device identifier is added."
     },
     "tests": {
-      "relationship_true_false_distinct": "pass",
-      "missing_callback_inconclusive": "pass",
-      "request_rejected_inconclusive": "pass",
-      "fallback_state_explicit": "pass"
+      "valid_probe_preserved_for_correlation_and_removed_from_url": "pass",
+      "invalid_probe_rejected_and_removed": "pass",
+      "automatic_probe_report_without_manual_action": "pass",
+      "pass_requires_all_positive_evidence": "pass",
+      "fallback_overrides_positive_evidence": "pass",
+      "explicit_dal_false_fail_dal": "pass",
+      "timeout_unknown_never_pass": "pass",
+      "missing_pwa_correlation_inconclusive_until_exhausted": "pass"
     },
     "remaining_blocker": null
   },
