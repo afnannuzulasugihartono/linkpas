@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
 }
 
+def diagnosticsEndpoint = project.findProperty('linkpasDiagnosticsEndpoint') ?: 'https://ignmxvommfnkllcpliuw.supabase.co/functions/v1/linkpas-diagnostics'
+
 android {
     namespace 'id.barangpas.linkpas'
     compileSdk 36
@@ -12,7 +14,7 @@ android {
         targetSdk 35
         versionCode 1
         versionName '0.1.0-beta'
-        buildConfigField 'String', 'DIAGNOSTICS_ENDPOINT', '"https://ignmxvommfnkllcpliuw.supabase.co/functions/v1/linkpas-diagnostics"'
+        buildConfigField 'String', 'DIAGNOSTICS_ENDPOINT', '"' + diagnosticsEndpoint + '"'
         buildConfigField 'String', 'DIAGNOSTICS_PUBLISHABLE_KEY', '"sb_publishable_CzSU2cNRiNUY7qZzCv77QQ_jGEdaBQ3"'
     }
 
