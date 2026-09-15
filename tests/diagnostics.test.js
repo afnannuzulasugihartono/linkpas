@@ -109,26 +109,29 @@ test('startup without native probe emits an automatic diagnostic beacon', async 
 
 test('concurrent diagnostic reports are serialized instead of dropped', async () => {
   const payloads = [];
-  let releaseFirst;
-  const firstGate = new Promise((resolve) => { releaseFirst = resolve; });
-  let call = 0;
+  let inFlight = 0;
+  let maxInFlight = 0;
+  let sequence = 0;
   const { api } = loadDiagnostics({
     probeId: '123e4567-e89b-42d3-a456-426614174000',
     fetchImpl: async (_url, init) => {
-      call += 1;
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
       payloads.push(JSON.parse(init.body));
-      if (call === 1) await firstGate;
-      return { ok: true, status: 201, json: async () => ({ report_id: `r${call}` }) };
+      sequence += 1;
+      const reportId = `r${sequence}`;
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight -= 1;
+      return { ok: true, status: 201, json: async () => ({ report_id: reportId }) };
     },
   });
 
-  const manual = api.report({ errorType: 'second_report' });
-  await new Promise((resolve) => setTimeout(resolve, 10));
-  assert.equal(payloads.length, 1);
-  releaseFirst();
-  await manual;
-  await new Promise((resolve) => setTimeout(resolve, 10));
-  assert.equal(payloads.length, 2);
-  assert.equal(payloads[0].error_type, 'pwa_launch_probe');
-  assert.equal(payloads[1].error_type, 'second_report');
+  const first = api.report({ errorType: 'first_report' });
+  const second = api.report({ errorType: 'second_report' });
+  await Promise.all([first, second]);
+  await new Promise((resolve) => setTimeout(resolve, 25));
+
+  assert.equal(maxInFlight, 1);
+  const types = payloads.map((payload) => payload.error_type).sort();
+  assert.deepEqual(types, ['first_report', 'pwa_launch_probe', 'second_report'].sort());
 });
