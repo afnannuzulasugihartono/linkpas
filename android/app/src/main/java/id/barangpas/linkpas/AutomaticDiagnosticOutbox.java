@@ -3,13 +3,16 @@ package id.barangpas.linkpas;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.json.JSONArray;
-
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class AutomaticDiagnosticOutbox {
     private static final String PREFS = "linkpas_native_diagnostics";
-    private static final String KEY_OUTBOX = "automatic_outbox_v1";
+    private static final String KEY_OUTBOX = "automatic_outbox_v2";
     private static final String KEY_LAST_REPORT = "last_report_id";
     private static final String KEY_LAST_TRANSPORT_ERROR = "last_transport_error";
     private static final int MAX_ENTRIES = 12;
@@ -26,7 +29,7 @@ final class AutomaticDiagnosticOutbox {
         synchronized (LOCK) {
             try {
                 SharedPreferences prefs = app.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-                String next = append(prefs.getString(KEY_OUTBOX, "[]"), correlated);
+                String next = append(prefs.getString(KEY_OUTBOX, ""), correlated);
                 prefs.edit().putString(KEY_OUTBOX, next).commit();
             } catch (Exception ignored) {
                 return;
@@ -77,7 +80,6 @@ final class AutomaticDiagnosticOutbox {
             }
         } finally {
             FLUSHING.set(false);
-            // Catch an item enqueued during the small window between the last peek and FLUSHING=false.
             if (!transportFailed && peek(context) != null) flushAsync(context);
         }
     }
@@ -86,7 +88,7 @@ final class AutomaticDiagnosticOutbox {
         synchronized (LOCK) {
             try {
                 SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-                return first(prefs.getString(KEY_OUTBOX, "[]"));
+                return first(prefs.getString(KEY_OUTBOX, ""));
             } catch (Exception ignored) {
                 return null;
             }
@@ -97,7 +99,7 @@ final class AutomaticDiagnosticOutbox {
         synchronized (LOCK) {
             try {
                 SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-                String next = dropFirst(prefs.getString(KEY_OUTBOX, "[]"));
+                String next = dropFirst(prefs.getString(KEY_OUTBOX, ""));
                 prefs.edit().putString(KEY_OUTBOX, next).commit();
             } catch (Exception ignored) {
                 // Keep diagnostics best effort only.
@@ -128,42 +130,55 @@ final class AutomaticDiagnosticOutbox {
     }
 
     static String append(String raw, String payload) {
-        JSONArray source = parse(raw);
-        JSONArray next = new JSONArray();
-        int start = Math.max(0, source.length() - (MAX_ENTRIES - 1));
-        for (int i = start; i < source.length(); i++) {
-            String value = source.optString(i, null);
-            if (value != null && !value.isEmpty()) next.put(value);
-        }
-        if (payload != null && !payload.isEmpty()) next.put(payload);
-        return next.toString();
+        List<String> rows = parse(raw);
+        if (payload != null && !payload.isEmpty()) rows.add(payload);
+        while (rows.size() > MAX_ENTRIES) rows.remove(0);
+        return serialize(rows);
     }
 
     static String first(String raw) {
-        JSONArray rows = parse(raw);
-        String value = rows.optString(0, null);
-        return value == null || value.isEmpty() ? null : value;
+        List<String> rows = parse(raw);
+        return rows.isEmpty() ? null : rows.get(0);
     }
 
     static String dropFirst(String raw) {
-        JSONArray rows = parse(raw);
-        JSONArray next = new JSONArray();
-        for (int i = 1; i < rows.length(); i++) {
-            String value = rows.optString(i, null);
-            if (value != null && !value.isEmpty()) next.put(value);
-        }
-        return next.toString();
+        List<String> rows = parse(raw);
+        if (!rows.isEmpty()) rows.remove(0);
+        return serialize(rows);
     }
 
     static int size(String raw) {
-        return parse(raw).length();
+        return parse(raw).size();
     }
 
-    private static JSONArray parse(String raw) {
-        try {
-            return raw == null || raw.isEmpty() ? new JSONArray() : new JSONArray(raw);
-        } catch (Exception ignored) {
-            return new JSONArray();
+    private static List<String> parse(String raw) {
+        List<String> rows = new ArrayList<>();
+        if (raw == null || raw.isEmpty()) return rows;
+        String[] encoded = raw.split("\\n");
+        for (String item : encoded) {
+            if (item == null || item.isEmpty()) continue;
+            try {
+                String decoded = URLDecoder.decode(item, StandardCharsets.UTF_8.name());
+                if (!decoded.isEmpty()) rows.add(decoded);
+            } catch (Exception ignored) {
+                // Drop malformed local diagnostics state rather than blocking startup.
+            }
         }
+        return rows;
+    }
+
+    private static String serialize(List<String> rows) {
+        StringBuilder out = new StringBuilder();
+        for (String row : rows) {
+            if (row == null || row.isEmpty()) continue;
+            try {
+                String encoded = URLEncoder.encode(row, StandardCharsets.UTF_8.name());
+                if (out.length() > 0) out.append('\n');
+                out.append(encoded);
+            } catch (Exception ignored) {
+                // UTF-8 is always available; ignore any unexpected local encoding failure.
+            }
+        }
+        return out.toString();
     }
 }
