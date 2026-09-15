@@ -2,10 +2,10 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "A6a1",
-  "last_completed_checkpoint": "D5",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5"],
-  "next_action": "Execute A6a1 only according to docs/A6A_SUBCHECKPOINTS.md: rebuild the current signed release candidate from Android source equivalent to current main, verify the existing release certificate identity, package/version, checksum, and native D4 diagnostics presence. Do not start A6a2 in the same turn.",
+  "current_checkpoint": "A6a2",
+  "last_completed_checkpoint": "A6a1",
+  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1"],
+  "next_action": "Execute A6a2 only according to docs/A6A_SUBCHECKPOINTS.md: fresh-install the A6a1 signed release candidate on Android, verify package/version and normal launch, force/recheck App Links/domain verification, and prove verified TWA/fullscreen versus browser/custom-tab fallback using Android runtime evidence. Do not start A6b in the same turn.",
   "blocker": null,
   "roadmap_revision": {
     "reason": "A6 was split before execution, and A6a was split again because the signed A5 APK predates D4a/D4b Android-wrapper changes and cannot be the final acceptance binary.",
@@ -19,23 +19,37 @@
     "privacy_rule": "Use synthetic/non-sensitive test data only; keep signing key/password outside Git and logs; consult Beta Diagnostics on runtime failures."
   },
   "last_checkpoint_evidence": {
-    "checkpoint": "D5",
+    "checkpoint": "A6a1",
     "result": "PASS",
-    "product_pr": 8,
-    "product_merge_sha": "2b032a6c16d9f9fa15469742e2b837fb299ff609",
-    "controlled_beta_validation": {
-      "browser_run_id": "1af0567f-9d28-4f2f-a0e9-0f0bca677b73",
-      "supabase_report_id": "70357fff-8d80-4a68-8187-bea7ae5e9924",
-      "source": "pwa",
-      "error_type": "window_error",
-      "inspection_without_screenshot": true
+    "validation_branch": "chore/a6a1-release-rebuild",
+    "validation_commit": "fb91371b397450d1d2fcab287d508e92ce068e3d",
+    "main_base_commit": "6736e32e6843e52553d43e2e38f59d9490d3f36f",
+    "source_equivalence": "GitHub compare confirms the validation commit differs from main_base_commit only by .github/workflows/a6a1-release-rebuild.yml; Android source is identical.",
+    "ci_run_id": 34936914129,
+    "android_unit_tests": "success",
+    "unsigned_release_build": "success",
+    "signed_artifact": "LINKPAS-v0.1.0-beta-rc.apk",
+    "artifact_size_bytes": 3802000,
+    "apk_sha256": "3f86941bf39d57c1fb22989ac31ed7d567986fa9af5c5432d831031e0c38aedc",
+    "package_name": "id.barangpas.linkpas",
+    "version_name": "0.1.0-beta",
+    "version_code": 1,
+    "signers": 1,
+    "signature_schemes": {
+      "v1": true,
+      "v2": true,
+      "v3": true
     },
-    "adb_fallback": {
-      "helper": "LINKPAS-Debug.bat",
-      "validation_ci_run_id": 34923946988,
-      "static_tests": "success",
-      "windows_helper_smoke": "success"
+    "signing_certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6",
+    "binary_checks": {
+      "LauncherActivity": true,
+      "NativeDiagnostics": true,
+      "NativeDiagnosticTransport": true,
+      "NativeDiagnosticSanitizer": true,
+      "ManageDataLauncherActivity": true,
+      "linkpas_vercel_app_host": true
     },
+    "signing_material": "Existing A4 signing identity reused outside Git. Keystore/password were not committed or included in the verification report.",
     "remaining_blocker": null
   },
   "continuation_semantics": {
