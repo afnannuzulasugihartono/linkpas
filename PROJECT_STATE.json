@@ -1,48 +1,15 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "READY",
+  "status": "BLOCKED",
   "current_checkpoint": "A6c",
   "last_completed_checkpoint": "A6b",
   "completed_checkpoints": [
-    "A1",
-    "A2",
-    "A3",
-    "A4",
-    "A5",
-    "D1",
-    "D2",
-    "D3",
-    "D4a",
-    "D4b",
-    "D5",
-    "A6a1",
-    "A6a2a",
-    "A6a2b",
-    "A6a2c",
-    "A6a2d",
-    "A6a2e",
-    "A6b"
+    "A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5",
+    "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b"
   ],
-  "next_action": "Execute A6c only according to docs/APK_CHECKPOINTS.md. On the installed signed LINKPAS 0.1.0-beta.2 / code 2 APK, prime the app online, remove network connectivity, relaunch/revisit, and verify the offline shell plus local link extraction/classification/deduplication continue to work with synthetic links. Confirm diagnostics/network upload failure does not block core processing, and distinguish any network-dependent license failure from local-core failure. Do not start A7 in the same turn.",
-  "blocker": null,
-  "roadmap_revision": {
-    "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 was split because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance.",
-    "a6_subcheckpoints": [
-      "A6a1",
-      "A6a2a",
-      "A6a2b",
-      "A6a2c",
-      "A6a2d",
-      "A6a2e",
-      "A6b",
-      "A6c"
-    ],
-    "supplemental_roadmap": "docs/A6A_SUBCHECKPOINTS.md",
-    "resume_after_a6": "A7",
-    "automatic_verification_policy": "Normal A6a2 path must not require user-run ADB or screenshots. Public Android/browser evidence is evaluated first. Callback timeout/unknown is INCONCLUSIVE, never guessed. ADB is a last-resort fallback only after automatic evidence is exhausted.",
-    "privacy_rule": "Use synthetic/non-sensitive test data only; probe IDs contain no user data; keep signing key/password outside Git and logs; diagnostics collect technical metadata only."
-  },
+  "next_action": "Resume A6c only. On the installed signed LINKPAS 0.1.0-beta.2 / code 2 APK that has already been primed online, disable Wi-Fi and mobile data, fully close LINKPAS, reopen it from the app icon while still offline, use the built-in Sample action and process it, then restore network without closing the app and send one Beta Diagnostics report. Acceptance evidence should show app_boot/network state offline before process_complete, sample_loaded, processed=7;unique=6;truncated=0, followed by network_online after connectivity is restored. Confirm the shell visibly loaded and the local result table appeared offline. Do not start A7 in the same turn.",
+  "blocker": "A6c requires one real-device offline TWA run. Repository/production precheck supports offline shell behavior, but Android runtime acceptance cannot be claimed until the device is relaunched without network and local processing is observed.",
   "last_checkpoint_evidence": {
     "checkpoint": "A6b",
     "result": "PASS",
@@ -53,14 +20,7 @@
       "version_name": "0.1.0-beta.2",
       "version_code": 2
     },
-    "runtime_report": {
-      "report_id": "9cc5ec6c-4cda-4028-b48f-638b9fe666dd",
-      "source": "pwa",
-      "error_type": "manual_diagnostic",
-      "online": true,
-      "service_worker_state": "controlled",
-      "probe_id": "415fa628-3cbd-4d66-b1ea-ab28c25b714e"
-    },
+    "runtime_report_id": "9cc5ec6c-4cda-4028-b48f-638b9fe666dd",
     "online_core_acceptance": {
       "processed_count": 50,
       "truncated_count": 5,
@@ -68,33 +28,36 @@
       "duplicate_count": 1,
       "copy_unique_count": 49,
       "txt_export_count": 49,
-      "csv_export_count": 50,
-      "process_breadcrumb": "processed=50;unique=49;truncated=5",
-      "copy_breadcrumb": "count=49",
-      "txt_breadcrumb": "count=49",
-      "csv_breadcrumb": "count=50"
+      "csv_export_count": 50
     },
-    "repository_core_tests": {
-      "dedup_exact": "covered",
-      "free_limit_50": "covered",
-      "csv_columns": "covered",
-      "web_ci_run_id": 34951630858,
-      "web_ci_build": "success",
-      "web_ci_tests": "success"
-    },
-    "failure_evidence": {
-      "runtime_error_after_acceptance_actions": false,
-      "fetch_failure_after_acceptance_actions": false
-    },
-    "privacy": "A6b used only the supplied synthetic non-sensitive link dataset; diagnostics contained technical breadcrumbs/counts and did not include the pasted link contents.",
     "remaining_blocker": null
   },
-  "recovery_history": {
-    "automatic_diagnostics_pr": 12,
-    "automatic_diagnostics_merge_sha": "67e75a9a8569a5c2525c9071121e7208f1661efa",
-    "versioned_recovery_pr": 13,
-    "versioned_recovery_merge_sha": "26b82aff33d2b59d9845b463133263f58951fcac",
-    "note": "Earlier inconclusive/NEEDS_ADB attempts were superseded by the durable automatic diagnostics recovery and distinctly versioned beta.2 RC. ADB was ultimately not required for A6a2e."
+  "a6c_precheck_evidence": {
+    "main_sha_before_runtime_test": "fcc35c98e3e636eac4fd18b66ccf1a15e3c2cb9e",
+    "open_pull_requests": 0,
+    "production_service_worker": {
+      "cache_generation": "linkpas-pwa-v6",
+      "app_shell_cached": true,
+      "navigation_network_failure_falls_back_to_cached_root_or_index": true,
+      "cached_core_files": ["core.js", "license.js", "app.js", "diagnostics.js"]
+    },
+    "license_behavior": {
+      "network_exception_is_caught": true,
+      "verification_returns_false": true,
+      "local_core_is_not_thrown_or_blocked_by_license_verify_failure": true
+    },
+    "expected_offline_sample": {
+      "processed_count": 7,
+      "unique_count": 6,
+      "duplicate_count": 1,
+      "truncated_count": 0
+    },
+    "required_runtime_proof": [
+      "offline shell visibly loads after prior online priming",
+      "sample/process succeeds while device remains offline",
+      "diagnostics/network failure does not block local processing",
+      "network-dependent license behavior is not misclassified as local-core failure"
+    ]
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
