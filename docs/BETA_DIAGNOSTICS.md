@@ -48,7 +48,7 @@ A direct REST read using the public publishable key returned HTTP `401` / Postgr
 
 Temporary `pg_net` used only to validate the HTTP path was removed after the test.
 
-## Android native diagnostics (D4a)
+## Android native diagnostics (D4a/D4b)
 
 The Android TWA wrapper adds a Beta-only native diagnostics layer for failures that happen before or outside the PWA runtime.
 
@@ -66,6 +66,48 @@ The wrapper installs a best-effort uncaught-exception handler. A pending crash r
 
 A controlled Beta test hook is available through the boolean Android intent extra `linkpas_native_diag_test=true`. It emits `native_controlled_test` with `source=android` and does not depend on clipboard, affiliate links, license values, account data, or device identifiers.
 
-Native reporting is deliberately non-blocking: transport exceptions/timeouts are caught and return `null`, and startup continues independently of telemetry success. Unit tests cover transport failure and sanitizer behavior.
+Native reporting is deliberately non-blocking: transport exceptions/timeouts are caught and return `null`, and normal startup remains immediate. The controlled test path alone may wait for diagnostic completion, with a hard 5-second maximum before TWA handoff. Unit tests cover transport failure and sanitizer behavior.
 
-Runtime Android emission and Supabase readback are validated separately in D4b. TWA verification success, App Links verification state, browser fallback behavior, and some Chrome/TWA internals cannot be reliably proven from this wrapper telemetry alone and remain candidates for ADB/logcat diagnostics.
+D4b verified a real Android report in Supabase and confirmed a normal TWA-wrapper launch remained free of AndroidRuntime fatal exceptions after diagnostics initialization. TWA verification success, App Links verification state, browser fallback behavior, and some Chrome/TWA internals still cannot be proven from wrapper telemetry alone and remain ADB/logcat cases.
+
+## D5 operational command: `cek LINKPAS`
+
+When the user says `cek LINKPAS`, ChatGPT should use the connected Supabase tooling and treat the database as the authoritative diagnostic source. The workflow is:
+
+1. Read the newest relevant rows from `public.linkpas_diagnostic_reports`, normally the latest 10 ordered by `created_at desc`. If the user supplies a report ID, try that exact ID first, but also inspect the newest rows if the exact lookup misses; do not guess or rely only on a transcribed on-screen ID.
+2. Correlate `source`, `error_type`, app/build version, page, `breadcrumbs`, and allow-listed `diagnostics` fields. Use time proximity and source (`pwa` or `android`) to separate unrelated events.
+3. Map to a file/function only when evidence supports it. A stack, file/line/column, or distinctive error message can be correlated to the current repository. If sanitization has replaced a field with `[url]` or `[token]`, state that limitation rather than inventing a filename or function.
+4. Report findings under three evidence levels: `OBSERVED` for values directly stored in Supabase/logs, `LIKELY` for a repository correlation supported by those values, and `NEEDS_ADB` when telemetry cannot establish the condition.
+5. Use the Windows ADB fallback for verified-TWA/fullscreen versus browser fallback, Digital Asset Links/App Links verification, browser-provider/TWA failures not emitted by the wrapper, or crashes that happen before diagnostics can persist a report.
+
+ChatGPT must not claim it can see the phone screen, continuously watch the phone, or receive unsolicited messages into an already-open chat. The user must initiate inspection (`cek LINKPAS`) or explicitly provide a generated debug bundle.
+
+## D5 end-to-end validation evidence
+
+A controlled production Beta `window.onerror` was triggered through the existing diagnostic test hook. Supabase stored the resulting PWA report with stable database report ID `70357fff-8d80-4a68-8187-bea7ae5e9924`.
+
+The report establishes, without a screenshot:
+
+- `source=pwa`;
+- `error_type=window_error`;
+- production page sanitized to `https://linkpas.vercel.app/`;
+- breadcrumb sequence `app_boot -> app_ready -> window_error`;
+- `app_stage=runtime` and `network_state=online`;
+- error location line `194`, column `32` while the file URL itself was redacted by the backend sanitizer.
+
+The current `src/diagnostics.js` controlled-test branch throws `LINKPAS_DIAG_TEST_WINDOW_ERROR` at that location, so the supported diagnosis is: `OBSERVED: controlled PWA window error`; `LIKELY: diagnostic controlled-test throw in src/diagnostics.js`; no product/root-cause claim beyond that evidence is made.
+
+## Windows ADB fallback: `LINKPAS-Debug.bat`
+
+`LINKPAS-Debug.bat` is a one-click Windows helper for cases classified as `NEEDS_ADB`. It looks for `adb.exe` on PATH, beside the script in `platform-tools`, or in the default local Android SDK path. It requires exactly one authorized Android device before collection.
+
+The generated `LINKPAS-Debug-YYYYMMDD-HHMMSS.zip` is intentionally bounded to:
+
+- ADB version and device connection state without storing the device serial;
+- LINKPAS package path/version/App Links/TWA-relevant package lines;
+- `pm get-app-links id.barangpas.linkpas` output;
+- LINKPAS-relevant current activity state;
+- up to 400 lines of wrapper-process logcat when the wrapper process is running;
+- up to 800 recent system logcat lines filtered to LINKPAS package/host and TWA/App Links components.
+
+It deliberately does **not** run `adb bugreport`, take screenshots or screen recordings, read the clipboard, pull user storage, dump arbitrary files, or store device serial numbers. After generation, attach the ZIP in ChatGPT and say `cek LINKPAS`; the bundle is a fallback, not an automatic upload channel.
