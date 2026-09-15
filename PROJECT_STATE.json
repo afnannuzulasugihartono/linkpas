@@ -1,17 +1,17 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "BLOCKED",
-  "current_checkpoint": "A6c",
-  "last_completed_checkpoint": "A6b",
+  "status": "READY",
+  "current_checkpoint": "A7",
+  "last_completed_checkpoint": "A6c",
   "completed_checkpoints": [
     "A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5",
-    "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b"
+    "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b", "A6c"
   ],
-  "next_action": "Resume A6c only. On the installed signed LINKPAS 0.1.0-beta.2 / code 2 APK that has already been primed online, disable Wi-Fi and mobile data, fully close LINKPAS, reopen it from the app icon while still offline, use the built-in Sample action and process it, then restore network without closing the app and send one Beta Diagnostics report. Acceptance evidence should show app_boot/network state offline before process_complete, sample_loaded, processed=7;unique=6;truncated=0, followed by network_online after connectivity is restored. Confirm the shell visibly loaded and the local result table appeared offline. Do not start A7 in the same turn.",
-  "blocker": "A6c requires one real-device offline TWA run. Repository/production precheck supports offline shell behavior, but Android runtime acceptance cannot be claimed until the device is relaunched without network and local processing is observed.",
+  "next_action": "Execute A7 only according to docs/APK_CHECKPOINTS.md. Review the verified A6a-A6c acceptance evidence and fix only release-blocking APK issues discovered there. If no release blockers remain, complete A7 as a verified no-op. Do not start A8 in the same turn.",
+  "blocker": null,
   "last_checkpoint_evidence": {
-    "checkpoint": "A6b",
+    "checkpoint": "A6c",
     "result": "PASS",
     "artifact": {
       "filename": "LINKPAS-v0.1.0-beta.2-rc.apk",
@@ -20,44 +20,42 @@
       "version_name": "0.1.0-beta.2",
       "version_code": 2
     },
-    "runtime_report_id": "9cc5ec6c-4cda-4028-b48f-638b9fe666dd",
-    "online_core_acceptance": {
-      "processed_count": 50,
-      "truncated_count": 5,
-      "unique_count": 49,
-      "duplicate_count": 1,
-      "copy_unique_count": 49,
-      "txt_export_count": 49,
-      "csv_export_count": 50
+    "runtime_report": {
+      "report_id": "777b3869-f5db-4e15-b925-94e311804bb9",
+      "source": "pwa",
+      "error_type": "manual_diagnostic",
+      "online_at_report": true,
+      "service_worker_state": "controlled",
+      "probe_id": "32c0fe59-8ac4-4d26-853a-2d0bf10d63e3"
     },
-    "remaining_blocker": null
-  },
-  "a6c_precheck_evidence": {
-    "main_sha_before_runtime_test": "fcc35c98e3e636eac4fd18b66ccf1a15e3c2cb9e",
-    "open_pull_requests": 0,
+    "offline_core_acceptance": {
+      "app_boot_state": "offline",
+      "launch_probe_received": true,
+      "app_ready_mode": "demo",
+      "sample_loaded": true,
+      "processed_count": 7,
+      "unique_count": 6,
+      "duplicate_count": 1,
+      "truncated_count": 0,
+      "network_restored_event": "network_online",
+      "shell_loaded_offline": true,
+      "local_core_processed_offline": true,
+      "diagnostics_network_failure_blocked_core": false
+    },
+    "error_check": {
+      "runtime_or_fetch_errors_during_offline_acceptance": false
+    },
     "production_service_worker": {
       "cache_generation": "linkpas-pwa-v6",
       "app_shell_cached": true,
-      "navigation_network_failure_falls_back_to_cached_root_or_index": true,
-      "cached_core_files": ["core.js", "license.js", "app.js", "diagnostics.js"]
+      "navigation_network_failure_falls_back_to_cached_shell": true
     },
     "license_behavior": {
       "network_exception_is_caught": true,
       "verification_returns_false": true,
-      "local_core_is_not_thrown_or_blocked_by_license_verify_failure": true
+      "local_core_is_not_blocked": true
     },
-    "expected_offline_sample": {
-      "processed_count": 7,
-      "unique_count": 6,
-      "duplicate_count": 1,
-      "truncated_count": 0
-    },
-    "required_runtime_proof": [
-      "offline shell visibly loads after prior online priming",
-      "sample/process succeeds while device remains offline",
-      "diagnostics/network failure does not block local processing",
-      "network-dependent license behavior is not misclassified as local-core failure"
-    ]
+    "remaining_blocker": null
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
