@@ -37,7 +37,7 @@ public class NativeDiagnosticsTest {
 
     @Test
     public void automaticOutboxIsBoundedAndKeepsNewestEntriesInOrder() {
-        String raw = "[]";
+        String raw = "";
         for (int i = 0; i < 15; i += 1) {
             raw = AutomaticDiagnosticOutbox.append(raw, "payload-" + i);
         }
@@ -53,14 +53,9 @@ public class NativeDiagnosticsTest {
     public void queuedPayloadKeepsOriginalProbeAcrossLaterLaunches() {
         String firstProbe = "123e4567-e89b-42d3-a456-426614174000";
         String nextProbe = "223e4567-e89b-42d3-a456-426614174001";
-        String payload = "{\"source\":\"android\",\"error_type\":\"native_self_check\",\"diagnostics\":{}}";
 
-        LaunchProbeId.setCurrent(firstProbe);
-        String correlated = NativeDiagnosticTransport.withCurrentLaunchProbe(payload);
-        LaunchProbeId.setCurrent(nextProbe);
-        String retried = NativeDiagnosticTransport.withCurrentLaunchProbe(correlated);
-
-        assertTrue(retried.contains(firstProbe));
-        assertFalse(retried.contains(nextProbe));
+        assertEquals(firstProbe, LaunchProbeId.preferExisting(firstProbe, nextProbe));
+        assertEquals(nextProbe, LaunchProbeId.preferExisting(null, nextProbe));
+        assertNull(LaunchProbeId.preferExisting("buyer@example.com", "not-a-probe"));
     }
 }
