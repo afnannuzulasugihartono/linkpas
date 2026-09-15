@@ -44,17 +44,21 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Bridge runner DNS to emulator
+        id: dns_bridge
         shell: bash
         run: |
           UPSTREAM="$(awk '/^nameserver[[:space:]]+/{print $2; exit}' /etc/resolv.conf)"
-          if [[ -z "$UPSTREAM" ]]; then
-            echo 'No runner DNS resolver found.' >&2
+          HOST_IP="$(ip route get 1.1.1.1 | awk '{for (i=1; i<=NF; i++) if ($i == "src") {print $(i+1); exit}}')"
+          if [[ -z "$UPSTREAM" || -z "$HOST_IP" ]]; then
+            echo 'Could not resolve runner DNS bridge addresses.' >&2
             exit 1
           fi
           echo "D4B_DNS_UPSTREAM=$UPSTREAM"
-          sudo sh -c "nohup python3 '$GITHUB_WORKSPACE/.github/scripts/d4b-dns-proxy.py' '$UPSTREAM' >/tmp/d4b-dns-proxy.log 2>&1 &"
+          echo "D4B_DNS_BRIDGE_IP=$HOST_IP"
+          echo "server=$HOST_IP" >> "$GITHUB_OUTPUT"
+          sudo sh -c "nohup python3 '$GITHUB_WORKSPACE/.github/scripts/d4b-dns-proxy.py' '$HOST_IP' '$UPSTREAM' >/tmp/d4b-dns-proxy.log 2>&1 &"
           sleep 1
-          sudo ss -lunp | grep -q '127.0.0.1:53'
+          sudo ss -lunp | grep -q "$HOST_IP:53"
 
       - name: Run controlled native diagnostic on Android emulator
         id: runtime
@@ -65,7 +69,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -dns-server 10.0.2.2
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -dns-server ${{ steps.dns_bridge.outputs.server }}
           script: bash .github/scripts/d4b-runtime.sh
 
       - name: Upload D4b report ID evidence
