@@ -1,9 +1,9 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "BLOCKED",
-  "current_checkpoint": "A6b",
-  "last_completed_checkpoint": "A6a2e",
+  "status": "READY",
+  "current_checkpoint": "A6c",
+  "last_completed_checkpoint": "A6b",
   "completed_checkpoints": [
     "A1",
     "A2",
@@ -21,10 +21,11 @@
     "A6a2b",
     "A6a2c",
     "A6a2d",
-    "A6a2e"
+    "A6a2e",
+    "A6b"
   ],
-  "next_action": "Resume A6b only. On the installed signed LINKPAS 0.1.0-beta.2 / code 2 APK with network available, use the supplied 55-link synthetic dataset, verify 50 processed / 5 truncated / 49 unique / 1 duplicate, run Copy unique, TXT export, and CSV export, then open the hidden Beta Diagnostics panel by tapping the version label 5 times and send one manual diagnostic report. Read that Supabase report to verify process_complete/copy_clean/export_txt/export_csv breadcrumbs; user confirmation is still required that both downloaded files appeared on the Android device. Do not start A6c.",
-  "blocker": "A6b requires real-device Android TWA interaction for clipboard and file-download acceptance. Automated core precheck is green; awaiting the bounded synthetic device test and manual diagnostic report.",
+  "next_action": "Execute A6c only according to docs/APK_CHECKPOINTS.md. On the installed signed LINKPAS 0.1.0-beta.2 / code 2 APK, prime the app online, remove network connectivity, relaunch/revisit, and verify the offline shell plus local link extraction/classification/deduplication continue to work with synthetic links. Confirm diagnostics/network upload failure does not block core processing, and distinguish any network-dependent license failure from local-core failure. Do not start A7 in the same turn.",
+  "blocker": null,
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 was split because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance.",
     "a6_subcheckpoints": [
@@ -43,68 +44,35 @@
     "privacy_rule": "Use synthetic/non-sensitive test data only; probe IDs contain no user data; keep signing key/password outside Git and logs; diagnostics collect technical metadata only."
   },
   "last_checkpoint_evidence": {
-    "checkpoint": "A6a2e",
+    "checkpoint": "A6b",
     "result": "PASS",
-    "verdict": "PASS_VERIFIED_TWA",
     "artifact": {
       "filename": "LINKPAS-v0.1.0-beta.2-rc.apk",
       "sha256": "64d87aa2cef249a1bd923e74edff18128260a7c6aa6ed9b02078a17f64707f27",
       "package": "id.barangpas.linkpas",
       "version_name": "0.1.0-beta.2",
-      "version_code": 2,
-      "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6"
+      "version_code": 2
     },
-    "probe_id": "415fa628-3cbd-4d66-b1ea-ab28c25b714e",
-    "supabase_reports": {
-      "pwa_launch_probe": "20916d82-3ce9-4472-84d4-14645b492135",
-      "native_self_check": "fde6404b-b40b-41df-ac4f-fced001deec5",
-      "native_twa_launch": "3d953510-479b-48ab-950c-d47950f5303b",
-      "native_dal_result": "2fad79a6-fd56-4be2-99de-4df878335f8a"
+    "runtime_report": {
+      "report_id": "9cc5ec6c-4cda-4028-b48f-638b9fe666dd",
+      "source": "pwa",
+      "error_type": "manual_diagnostic",
+      "online": true,
+      "service_worker_state": "controlled",
+      "probe_id": "415fa628-3cbd-4d66-b1ea-ab28c25b714e"
     },
-    "mandatory_positive_evidence": {
-      "native_identity": "app_version=0.1.0-beta.2 and build_version=2",
-      "signer_state": "match",
-      "signer_match": true,
-      "app_links_state": "verified",
-      "link_handling_allowed": true,
-      "browser_provider": "com.android.chrome",
-      "twa_capable_provider": "com.android.chrome",
-      "twa_launch_requested": true,
-      "dal_relation": "delegate_permission/common.handle_all_urls",
-      "dal_relationship_state": "true",
-      "dal_relationship_detail": "callback_result",
-      "fallback_invoked": false,
-      "fallback_state": "not_observed",
-      "pwa_probe_observed": true,
-      "pwa_probe_source": "android_twa_launch",
-      "pwa_service_worker_state": "controlled",
-      "pwa_online": true,
-      "correlation": "All four reports share the same valid random probe_id."
-    },
-    "twa_capability_interpretation": "NativeSelfCheck only reports a concrete twa_capable_provider after Android PackageManager discovers a service advertising androidx.browser.trusted.category.TrustedWebActivities; the observed provider is com.android.chrome and matches the selected browser provider.",
-    "failure_evidence": {
-      "fallback_observed": false,
-      "dal_false_observed": false,
-      "signer_mismatch_observed": false,
-      "app_links_unverified_observed": false
-    },
-    "privacy": "Evidence contains only technical metadata and random probe correlation; no user content, clipboard data, affiliate links, buyer email, license values, credentials, signing material, screenshots, files, or device identifiers were required.",
-    "remaining_blocker": null
-  },
-  "a6b_attempt_evidence": {
-    "phase": "real_device_interaction_pending",
-    "installed_artifact": "LINKPAS-v0.1.0-beta.2-rc.apk",
-    "network_required": true,
-    "synthetic_dataset_file": "LINKPAS-A6b-test-55-links.txt",
-    "synthetic_dataset_candidates": 55,
-    "expected": {
+    "online_core_acceptance": {
       "processed_count": 50,
       "truncated_count": 5,
       "unique_count": 49,
       "duplicate_count": 1,
       "copy_unique_count": 49,
-      "txt_unique_lines": 49,
-      "csv_valid_rows": 50
+      "txt_export_count": 49,
+      "csv_export_count": 50,
+      "process_breadcrumb": "processed=50;unique=49;truncated=5",
+      "copy_breadcrumb": "count=49",
+      "txt_breadcrumb": "count=49",
+      "csv_breadcrumb": "count=50"
     },
     "repository_core_tests": {
       "dedup_exact": "covered",
@@ -114,18 +82,12 @@
       "web_ci_build": "success",
       "web_ci_tests": "success"
     },
-    "runtime_breadcrumbs_expected": [
-      "process_complete",
-      "copy_clean",
-      "export_txt",
-      "export_csv",
-      "manual_diagnostic_report"
-    ],
-    "download_confirmation_required": [
-      "TXT file appears on Android device",
-      "CSV file appears on Android device"
-    ],
-    "automation_note": "TinyFish strict-mode smoke test could not start because the connected account is not enabled for strict agent mode; no browser-run evidence was claimed."
+    "failure_evidence": {
+      "runtime_error_after_acceptance_actions": false,
+      "fetch_failure_after_acceptance_actions": false
+    },
+    "privacy": "A6b used only the supplied synthetic non-sensitive link dataset; diagnostics contained technical breadcrumbs/counts and did not include the pasted link contents.",
+    "remaining_blocker": null
   },
   "recovery_history": {
     "automatic_diagnostics_pr": 12,
