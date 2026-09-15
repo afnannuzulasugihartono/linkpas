@@ -2,17 +2,17 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "D4",
+  "current_checkpoint": "D4a",
   "last_completed_checkpoint": "D3",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3"],
-  "next_action": "Add minimal Android/TWA native diagnostics according to docs/APK_CHECKPOINTS.md D4.",
+  "next_action": "Implement Android/TWA native diagnostics and verify tests/release build according to docs/APK_CHECKPOINTS.md D4a.",
   "blocker": null,
   "roadmap_revision": {
-    "reason": "User explicitly requested Beta Diagnostics inside LINKPAS so failures can be inspected through Supabase without relying on screenshots.",
+    "reason": "D4 was split before implementation because Android runtime/emulator validation plus build verification cannot be bounded reliably inside one 18-minute checkpoint.",
     "inserted_before": "A6",
-    "diagnostic_checkpoints": ["D1", "D2", "D3", "D4", "D5"],
+    "diagnostic_checkpoints": ["D1", "D2", "D3", "D4a", "D4b", "D5"],
     "resume_after_diagnostics": "A6",
-    "privacy_rule": "Do not collect affiliate-link contents, clipboard contents, buyer email, raw license keys, passwords, or other user content by default."
+    "privacy_rule": "Do not collect affiliate-link contents, clipboard contents, buyer email, raw license keys, passwords, device identifiers, or other user content by default."
   },
   "last_checkpoint_evidence": {
     "checkpoint": "D3",
@@ -24,22 +24,8 @@
     "normal_load_panel_hidden": true,
     "hidden_entry": "Five cumulative clicks on v0.1.0-beta version label",
     "hidden_entry_verified": true,
-    "visible_fields": {
-      "app_version": "0.1.0-beta",
-      "package": "id.barangpas.linkpas",
-      "domain": "linkpas.vercel.app",
-      "network": "Online",
-      "service_worker": "controlled",
-      "last_diagnostic_error": "Tidak ada",
-      "last_report_id_before_manual_send": "Belum ada"
-    },
-    "privacy_panel_check": "PASS; no license key value, affiliate-link contents, clipboard contents, email, password, or other user content displayed",
     "manual_report_id": "f1145270-67b4-4c14-b793-5180bad16370",
-    "manual_report_visible_in_panel": true,
     "manual_report_supabase_readback": true,
-    "manual_report_type": "manual_diagnostic",
-    "manual_report_service_worker_state": "controlled",
-    "manual_report_app_stage": "diagnostics_panel",
     "normal_workflow_after_panel": {
       "processed": 7,
       "unique": 6,
