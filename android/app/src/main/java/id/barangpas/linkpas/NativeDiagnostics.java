@@ -23,6 +23,7 @@ final class NativeDiagnostics {
     private static final String KEY_PENDING = "pending_report";
     private static final String KEY_STAGE = "last_stage";
     private static final String KEY_LAST_REPORT = "last_report_id";
+    private static final String KEY_LAST_TRANSPORT_ERROR = "last_transport_error";
     private static final AtomicBoolean HANDLER_INSTALLED = new AtomicBoolean(false);
 
     private NativeDiagnostics() {}
@@ -83,7 +84,16 @@ final class NativeDiagnostics {
                     BuildConfig.DIAGNOSTICS_PUBLISHABLE_KEY,
                     pending);
             if (reportId != null) {
-                prefs.edit().remove(KEY_PENDING).putString(KEY_LAST_REPORT, reportId).apply();
+                prefs.edit()
+                        .remove(KEY_PENDING)
+                        .remove(KEY_LAST_TRANSPORT_ERROR)
+                        .putString(KEY_LAST_REPORT, reportId)
+                        .apply();
+            } else {
+                prefs.edit()
+                        .putString(KEY_LAST_TRANSPORT_ERROR,
+                                NativeDiagnosticSanitizer.redact(NativeDiagnosticTransport.getLastFailureCode(), 80))
+                        .apply();
             }
         }, "linkpas-diag-flush").start();
     }
@@ -94,13 +104,16 @@ final class NativeDiagnostics {
                     BuildConfig.DIAGNOSTICS_ENDPOINT,
                     BuildConfig.DIAGNOSTICS_PUBLISHABLE_KEY,
                     payload);
-            if (reportId != null) {
-                try {
-                    context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                            .edit().putString(KEY_LAST_REPORT, reportId).apply();
-                } catch (Exception ignored) {
-                    // Reporting success must not affect app flow.
+            try {
+                SharedPreferences.Editor editor = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
+                if (reportId != null) {
+                    editor.remove(KEY_LAST_TRANSPORT_ERROR).putString(KEY_LAST_REPORT, reportId).apply();
+                } else {
+                    editor.putString(KEY_LAST_TRANSPORT_ERROR,
+                            NativeDiagnosticSanitizer.redact(NativeDiagnosticTransport.getLastFailureCode(), 80)).apply();
                 }
+            } catch (Exception ignored) {
+                // Reporting state must not affect app flow.
             }
         }, "linkpas-diag-send").start();
     }
