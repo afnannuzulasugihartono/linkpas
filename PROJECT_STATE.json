@@ -2,10 +2,10 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "A6a2d",
-  "last_completed_checkpoint": "A6a2c",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c"],
-  "next_action": "Execute A6a2d only according to docs/A6A_SUBCHECKPOINTS.md: build a release candidate containing the accepted A6a2a-c verification instrumentation, sign it with the existing A4 release identity outside Git, verify package/version, APK signature and published certificate fingerprint, checksum, and presence of the automatic self-check/probe implementation. Keep signing secrets outside Git/logs. Do not start A6a2e in the same turn.",
+  "current_checkpoint": "A6a2e",
+  "last_completed_checkpoint": "A6a2d",
+  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d"],
+  "next_action": "Execute A6a2e only according to docs/A6A_SUBCHECKPOINTS.md: install/update the A6a2d signed RC on the real Android device, open LINKPAS normally, read the correlated native/PWA reports from Supabase, and evaluate signer, App Links, TWA-capable provider, browser DAL relationship, fallback state, PWA handshake, and launch health using the deterministic verdict rules. Routine path must not require ADB, screenshot, or manual debug commands. Do not start A6b in the same turn.",
   "blocker": null,
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit inside one 18-minute checkpoint.",
@@ -24,44 +24,48 @@
     "privacy_rule": "Use synthetic/non-sensitive test data only; probe IDs must be random technical IDs with no user data; keep signing key/password outside Git and logs; diagnostics collect technical metadata only."
   },
   "last_checkpoint_evidence": {
-    "checkpoint": "A6a2c",
+    "checkpoint": "A6a2d",
     "result": "PASS",
-    "product_pr": 11,
-    "product_merge_sha": "66643df37e46ebf835d442e0c9b6d9d5de996019",
-    "validation_head_sha": "09e6114e7f145dca4b1dcca001e2935847819ffe",
+    "artifact": {
+      "filename": "LINKPAS-v0.1.0-beta-a6a2d-rc.apk",
+      "sha256": "8779752cddb6fe4af0a4ff9ed52e2001d009e699a88435f426ec2d22462c1fe5",
+      "size_bytes": 3810192,
+      "package": "id.barangpas.linkpas",
+      "version_name": "0.1.0-beta",
+      "version_code": 1
+    },
+    "source": {
+      "validation_head_sha": "09e6114e7f145dca4b1dcca001e2935847819ffe",
+      "product_merge_sha": "66643df37e46ebf835d442e0c9b6d9d5de996019",
+      "main_at_validation_start": "30ffd8fc8eb8289133ffbab70b6161d3e2f5a066",
+      "equivalence": "GitHub compare from validation head to main shows only PROJECT_STATE.json changed; Android/product source used by the release artifact did not drift."
+    },
     "ci": {
-      "web_run_id": 34943098287,
-      "web_build": "success",
-      "web_tests": "success",
-      "debug_run_id": 34943098305,
-      "debug_build": "success",
       "release_run_id": 34943098218,
       "android_unit_tests": "success",
-      "unsigned_release_build": "success"
+      "unsigned_release_build": "success",
+      "unsigned_artifact_id": 10385453725
     },
-    "supabase": {
-      "diagnostics_edge_function": "linkpas-diagnostics",
-      "version": 3,
-      "status": "ACTIVE",
-      "correlation_metadata_allowlist": "Probe ID plus bounded A6a2a/A6a2b signer/App Links/browser DAL/fallback technical evidence is retained; invalid probe IDs are discarded."
+    "signing": {
+      "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6",
+      "signers": 1,
+      "v1": "pass",
+      "v2": "pass",
+      "v3": "pass",
+      "identity": "Matches the existing A4 release certificate fingerprint published in Digital Asset Links.",
+      "secret_handling": "Private keystore/password were used only from the existing private signing backup outside Git and were not written to repository files or diagnostic logs."
     },
-    "automatic_probe_correlation": {
-      "probe_generation": "Beta Android wrapper generates a random UUID launch probe kept as technical correlation data only.",
-      "pwa_history_cleanup": "PWA captures a valid probe and immediately removes the probe parameter from visible URL/history before normal runtime continues.",
-      "automatic_pwa_report": "Valid launch probes automatically emit a sanitized PWA runtime report without requiring the manual diagnostics button.",
-      "native_correlation": "Native self-check and browser TWA evidence attach the same launch probe ID so Android and PWA evidence can be correlated in Supabase.",
-      "verdict_policy": "Deterministic PASS_VERIFIED_TWA, FAIL_FALLBACK, FAIL_DAL, INCONCLUSIVE, and NEEDS_ADB rules are present; timeout/unknown evidence is never promoted to PASS.",
-      "privacy": "Probe is a bounded random technical UUID and no affiliate-link content, clipboard content, buyer email, license value, signing material, credentials, or device identifier is added."
-    },
-    "tests": {
-      "valid_probe_preserved_for_correlation_and_removed_from_url": "pass",
-      "invalid_probe_rejected_and_removed": "pass",
-      "automatic_probe_report_without_manual_action": "pass",
-      "pass_requires_all_positive_evidence": "pass",
-      "fallback_overrides_positive_evidence": "pass",
-      "explicit_dal_false_fail_dal": "pass",
-      "timeout_unknown_never_pass": "pass",
-      "missing_pwa_correlation_inconclusive_until_exhausted": "pass"
+    "instrumentation": {
+      "manifest_package": "present",
+      "manifest_version_name": "present",
+      "manifest_host": "linkpas.vercel.app present",
+      "LaunchProbeId": "present in classes.dex",
+      "NativeSelfCheck": "present in classes.dex",
+      "BrowserDalValidator": "present in classes.dex",
+      "BrowserTwaEvidence": "present in classes.dex",
+      "launch_probe_marker": "__linkpas_probe present in classes.dex",
+      "native_self_check_marker": "present in classes.dex",
+      "native_twa_evidence_marker": "present in classes.dex"
     },
     "remaining_blocker": null
   },
