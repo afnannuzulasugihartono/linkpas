@@ -24,7 +24,6 @@
   versionLabel.textContent = `v${version}`;
 
   let tapCount = 0;
-  let lastTapAt = 0;
 
   function setText(node, value) {
     if (node) node.textContent = String(value ?? '—');
@@ -56,9 +55,6 @@
   }
 
   versionLabel.addEventListener('click', () => {
-    const now = Date.now();
-    if (now - lastTapAt > 2200) tapCount = 0;
-    lastTapAt = now;
     tapCount += 1;
     if (tapCount >= 5) {
       tapCount = 0;
