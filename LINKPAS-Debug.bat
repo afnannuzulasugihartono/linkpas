@@ -60,7 +60,7 @@ if not "!DEVICE_COUNT!"=="1" (
 )
 
 "%ADB%" version >"%OUT%\adb-version.txt" 2>&1
-"%ADB%" shell get-state >"%OUT%\device-state.txt" 2>&1
+"%ADB%" get-state >"%OUT%\device-state.txt" 2>&1
 "%ADB%" shell pm path %PACKAGE% >"%OUT%\package-path.txt" 2>&1
 "%ADB%" shell pm get-app-links %PACKAGE% >"%OUT%\app-links.txt" 2>&1
 
