@@ -52,6 +52,27 @@ final class NativeDiagnostics {
                 "Controlled Android diagnostics event", null, "controlled_test"), true, completion);
     }
 
+    static void emitTwaEvidenceAsync(Context context,
+                                     String browserProvider,
+                                     String relationshipState,
+                                     String relationshipDetail,
+                                     boolean fallbackInvoked,
+                                     String stage) {
+        if (!BuildConfig.VERSION_NAME.contains("-beta")) return;
+        Context app = context.getApplicationContext();
+        emitAsync(
+                app,
+                buildTwaEvidencePayload(
+                        app,
+                        browserProvider,
+                        relationshipState,
+                        relationshipDetail,
+                        fallbackInvoked,
+                        stage),
+                false,
+                null);
+    }
+
     static void markStage(Context context, String stage) {
         try {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -211,6 +232,63 @@ final class NativeDiagnostics {
             return root.toString();
         } catch (Exception ignored) {
             return "{\"source\":\"android\",\"error_type\":\"native_self_check_payload_failed\"}";
+        }
+    }
+
+    private static String buildTwaEvidencePayload(Context context,
+                                                  String browserProvider,
+                                                  String relationshipState,
+                                                  String relationshipDetail,
+                                                  boolean fallbackInvoked,
+                                                  String stage) {
+        try {
+            String safeProvider = NativeDiagnosticSanitizer.redact(browserProvider, 120);
+            String safeRelationshipState = NativeDiagnosticSanitizer.redact(relationshipState, 40);
+            String safeRelationshipDetail = NativeDiagnosticSanitizer.redact(relationshipDetail, 100);
+            String safeStage = NativeDiagnosticSanitizer.redact(stage, 80);
+
+            JSONObject root = new JSONObject();
+            root.put("source", "android");
+            root.put("app_version", BuildConfig.VERSION_NAME);
+            root.put("build_version", String.valueOf(BuildConfig.VERSION_CODE));
+            root.put("package_name", context.getPackageName());
+            root.put("platform", "android");
+            root.put("platform_version", "sdk-" + Build.VERSION.SDK_INT);
+            root.put("browser", safeProvider == null ? "unresolved" : safeProvider);
+            root.put("error_type", "native_twa_evidence");
+            root.put("error_message", "Automatic Beta browser TWA evidence");
+            root.put("page", "https://" + NativeSelfCheck.HOST + "/");
+            root.put("service_worker_state", "not_applicable_native");
+
+            JSONArray breadcrumbs = new JSONArray();
+            JSONObject crumb = new JSONObject();
+            crumb.put("event", "native_stage");
+            crumb.put("at", nowIso());
+            crumb.put("state", safeStage == null ? "unknown" : safeStage);
+            breadcrumbs.put(crumb);
+            root.put("breadcrumbs", breadcrumbs);
+
+            JSONObject diagnostics = new JSONObject();
+            diagnostics.put("app_stage", safeStage == null ? "unknown" : safeStage);
+            diagnostics.put("twa_status", "browser_verification_evidence");
+            diagnostics.put("twa_launch_requested", true);
+            diagnostics.put("browser_provider", safeProvider == null ? "unresolved" : safeProvider);
+            diagnostics.put("dal_relation", "delegate_permission/common.handle_all_urls");
+            diagnostics.put("dal_relationship_state",
+                    safeRelationshipState == null
+                            ? BrowserTwaEvidence.RELATIONSHIP_INCONCLUSIVE
+                            : safeRelationshipState);
+            diagnostics.put("dal_relationship_detail",
+                    safeRelationshipDetail == null ? "unknown" : safeRelationshipDetail);
+            diagnostics.put("fallback_invoked", fallbackInvoked);
+            diagnostics.put("fallback_state", BrowserTwaEvidence.fallbackState(fallbackInvoked));
+            diagnostics.put("fallback_kind", fallbackInvoked ? "custom_tabs" : "not_observed");
+            diagnostics.put("release_channel", "beta");
+            diagnostics.put("target_host", NativeSelfCheck.HOST);
+            root.put("diagnostics", diagnostics);
+            return root.toString();
+        } catch (Exception ignored) {
+            return "{\"source\":\"android\",\"error_type\":\"native_twa_evidence_payload_failed\"}";
         }
     }
 
