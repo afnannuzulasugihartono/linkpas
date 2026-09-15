@@ -2,17 +2,19 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "A6",
+  "current_checkpoint": "A6a",
   "last_completed_checkpoint": "D5",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5"],
-  "next_action": "Execute A6 only: test the signed APK for install, launch, verified TWA/fullscreen behavior, paste/process links, deduplication, Free 50-link limit, copy/export behavior, and offline core behavior. Consult diagnostic reports on any failure, and split A6 before execution if the full matrix cannot reasonably fit inside 18 minutes.",
+  "next_action": "Execute A6a only: test the exact signed A5 APK for install, package/version identity, normal launch, App Links/domain verification, and verified TWA/fullscreen versus browser/custom-tab fallback. Do not start A6b in the same turn.",
   "blocker": null,
   "roadmap_revision": {
-    "reason": "D4 was split before implementation because Android runtime/emulator validation plus build verification cannot be bounded reliably inside one 18-minute checkpoint.",
-    "inserted_before": "A6",
-    "diagnostic_checkpoints": ["D1", "D2", "D3", "D4a", "D4b", "D5"],
-    "resume_after_diagnostics": "A6",
-    "privacy_rule": "Do not collect affiliate-link contents, clipboard contents, buyer email, raw license keys, passwords, device identifiers, or other user content by default."
+    "reason": "A6 was split before execution because install/TWA verification, online core behavior, and offline behavior cannot be validated reliably inside one 18-minute checkpoint.",
+    "a6_subcheckpoints": ["A6a", "A6b", "A6c"],
+    "a6a": "signed APK install, launch, and verified TWA/fullscreen",
+    "a6b": "online core-function acceptance",
+    "a6c": "offline-core acceptance",
+    "resume_after_a6": "A7",
+    "privacy_rule": "Use synthetic/non-sensitive test links only and consult Beta Diagnostics on failures."
   },
   "last_checkpoint_evidence": {
     "checkpoint": "D5",
@@ -21,73 +23,17 @@
     "product_merge_sha": "2b032a6c16d9f9fa15469742e2b837fb299ff609",
     "controlled_beta_validation": {
       "browser_run_id": "1af0567f-9d28-4f2f-a0e9-0f0bca677b73",
-      "trigger": "production PWA controlled window-error diagnostic hook",
       "supabase_report_id": "70357fff-8d80-4a68-8187-bea7ae5e9924",
       "source": "pwa",
       "error_type": "window_error",
-      "page": "https://linkpas.vercel.app/",
-      "breadcrumbs": ["app_boot", "app_ready", "window_error"],
-      "app_stage": "runtime",
-      "network_state": "online",
-      "line": 194,
-      "column": 32,
-      "file_value": "[url]",
-      "inspection_without_screenshot": true,
-      "repository_correlation": "The current src/diagnostics.js controlled window-error branch deliberately throws LINKPAS_DIAG_TEST_WINDOW_ERROR; this supports identifying the controlled failure class without claiming an unrelated product root cause.",
-      "evidence_levels": ["OBSERVED", "LIKELY", "NEEDS_ADB"]
-    },
-    "cek_linkpas_semantics": {
-      "documented_in": "docs/BETA_DIAGNOSTICS.md",
-      "newest_report_strategy": "Inspect newest relevant reports ordered by created_at desc; if an exact user-supplied report ID misses, inspect newest rows rather than guessing from a transcribed display value.",
-      "correlation_fields": ["source", "error_type", "app/build version", "page", "breadcrumbs", "diagnostics", "created_at"],
-      "no_guessing_rule": "Only map to a file/function when stack, file/line/column, or distinctive error metadata supports it; state sanitizer limitations such as [url] or [token].",
-      "screen_visibility_claim": false,
-      "unsolicited_chat_delivery_claim": false
+      "inspection_without_screenshot": true
     },
     "adb_fallback": {
       "helper": "LINKPAS-Debug.bat",
-      "one_click_windows": true,
-      "requires_exactly_one_authorized_device": true,
-      "bounded_outputs": [
-        "README.txt",
-        "adb-version.txt",
-        "device-state.txt",
-        "package-path.txt",
-        "app-links.txt",
-        "package-app-links.txt",
-        "activity.txt",
-        "wrapper-logcat.txt",
-        "system-filtered-logcat.txt"
-      ],
-      "logcat_limits": {
-        "wrapper_process_lines": 400,
-        "system_filtered_lines": 800
-      },
-      "privacy_exclusions": [
-        "adb bugreport",
-        "screenshots",
-        "screen recordings",
-        "clipboard",
-        "user storage pulls",
-        "arbitrary device files",
-        "device serial inventory"
-      ],
-      "use_when": [
-        "verified TWA/fullscreen versus browser/custom-tab fallback",
-        "Digital Asset Links/App Links verification",
-        "browser/TWA failures not emitted by wrapper telemetry",
-        "crashes before diagnostics can persist a report"
-      ]
-    },
-    "validation_ci": {
-      "workflow": "D5 Windows Debug Helper",
-      "run_id": 34923946988,
+      "validation_ci_run_id": 34923946988,
       "static_tests": "success",
-      "windows_helper_smoke": "success",
-      "windows_zip_contents_verified": true,
-      "existing_license_test_update": "Test-only correction: assertion now matches the established diagnostics.fetch wrapper used by src/license.js; no product behavior changed."
+      "windows_helper_smoke": "success"
     },
-    "privacy": "D5 diagnostics inspection and the Windows fallback are bounded to technical metadata. They do not intentionally collect affiliate-link contents, clipboard contents, buyer email, raw license values, passwords, signing secrets, credentials, device identifiers, screenshots, or unrelated device content.",
     "remaining_blocker": null
   },
   "continuation_semantics": {
