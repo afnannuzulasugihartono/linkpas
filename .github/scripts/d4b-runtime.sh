@@ -41,12 +41,18 @@ fi
 
 printf '%s\n' "$REPORT_ID" | tee d4b-report-id.txt
 
+# Isolate the normal-launch acceptance window from emulator boot and controlled-test logs.
+adb logcat -c
 adb shell am force-stop "$PACKAGE"
 NORMAL_OUTPUT="$(adb shell am start -W -n "$ACTIVITY")"
 printf '%s\n' "$NORMAL_OUTPUT"
 echo "$NORMAL_OUTPUT" | grep -q 'Status: ok'
+sleep 1
 
-if adb logcat -d -v brief | grep -E 'FATAL EXCEPTION:.*|Process: id\.barangpas\.linkpas' | tail -n 40 | grep -q 'id.barangpas.linkpas'; then
-  echo 'Unexpected LINKPAS fatal exception detected after diagnostics initialization.' >&2
+ANDROID_RUNTIME_ERRORS="$(adb logcat -d -v brief AndroidRuntime:E '*:S' 2>/dev/null || true)"
+if printf '%s\n' "$ANDROID_RUNTIME_ERRORS" | grep -Fq "Process: $PACKAGE"; then
+  echo 'D4B_NORMAL_LAUNCH_FATAL=detected' >&2
   exit 1
 fi
+
+echo 'D4B_NORMAL_LAUNCH_FATAL=none'
