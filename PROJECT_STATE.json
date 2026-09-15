@@ -5,8 +5,8 @@
   "current_checkpoint": "D4b",
   "last_completed_checkpoint": "D4a",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a"],
-  "next_action": "Recheck D4b runtime validation PR #6 / workflow run 34916930889. When terminal, inspect the emulator result and report-ID artifact; if successful, read the exact source=android report from Supabase, document ADB/logcat-only limitations, close the validation PR unmerged, complete D4b, and advance to D5.",
-  "blocker": "Required Android emulator validation workflow run 34916930889 for PR #6 is queued at the D4b validation gate.",
+  "next_action": "Instrument the D4b Android validation path to expose a bounded technical transport failure reason (without secrets or user data), then rerun the controlled native diagnostic once. Do not advance to D5 until an exact source=android report ID is read back from Supabase.",
+  "blocker": "The controlled native trigger launches successfully on the Android API 35 emulator, but no last_report_id is written within 30 seconds and Supabase contains no source=android diagnostic row. NativeDiagnosticTransport currently suppresses transport exceptions, so the exact Android-to-Edge-Function failure reason is not yet observable.",
   "roadmap_revision": {
     "reason": "D4 was split before implementation because Android runtime/emulator validation plus build verification cannot be bounded reliably inside one 18-minute checkpoint.",
     "inserted_before": "A6",
@@ -16,19 +16,37 @@
   },
   "in_progress_checkpoint_evidence": {
     "checkpoint": "D4b",
-    "result": "WAITING_FOR_RUNTIME_CI",
+    "result": "BLOCKED_RUNTIME_TRANSPORT",
     "validation_pr": 6,
     "validation_branch": "ci/d4b-runtime-validation",
-    "validation_head_sha": "f6ad17b4cf7ff458be2ce969d98e9e1c1ad01bf2",
-    "workflow": ".github/workflows/android-d4b-runtime.yml",
-    "workflow_run_id": 34916930889,
-    "workflow_status": "queued",
+    "validation_head_sha": "bc47b05ee1891a60e222a16ea959be8bb9225e93",
     "runtime": "Android emulator API 35 google_apis x86_64",
-    "controlled_trigger": "adb shell am start -W -n id.barangpas.linkpas/.LauncherActivity --ez linkpas_native_diag_test true",
-    "evidence_plan": "Poll app-private last_report_id via run-as, upload only d4b-report-id.txt, then verify a normal launch returns Status: ok without LINKPAS fatal exception.",
-    "privacy": "Validation enters no personal data or license values and uploads only the diagnostic report ID.",
+    "attempts": [
+      {
+        "run_id": 34916930889,
+        "result": "failure",
+        "cause": "validation harness used set -o pipefail under /usr/bin/sh before app runtime commands executed"
+      },
+      {
+        "run_id": 34917106786,
+        "result": "failure",
+        "cause": "emulator-runner executed multiline script entries in separate sh processes, so APK/PACKAGE/ACTIVITY variables did not persist"
+      },
+      {
+        "run_id": 34917324572,
+        "result": "failure",
+        "cause": "actual runtime path reached: APK install succeeded and LauncherActivity returned Status: ok, but no diagnostic report ID appeared within 30 seconds"
+      }
+    ],
+    "runtime_install": "PASS",
+    "controlled_trigger_activity_launch": "PASS; Status: ok",
+    "normal_product_crash_observed": false,
+    "runtime_report_id": null,
+    "supabase_source_android_rows": 0,
     "supabase_readback": false,
-    "runtime_supabase_report_id": null
+    "harness_fixes_are_validation_only": true,
+    "privacy": "No personal data, license values, affiliate-link contents, clipboard contents, signing secrets, credentials, or device identifiers were intentionally submitted by the validation workflow.",
+    "remaining_blocker": "Need bounded Android transport diagnostics to distinguish endpoint/auth/TLS/network/process-lifetime failure before another runtime retry."
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
