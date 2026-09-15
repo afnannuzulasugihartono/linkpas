@@ -14,15 +14,19 @@ echo "$TRIGGER_OUTPUT" | grep -q 'Status: ok'
 
 REPORT_ID=''
 TRANSPORT_ERROR=''
+LIFECYCLE=''
 for i in $(seq 1 30); do
   PREFS="$(adb shell run-as "$PACKAGE" cat shared_prefs/linkpas_native_diagnostics.xml 2>/dev/null || true)"
   REPORT_ID="$(printf '%s\n' "$PREFS" | sed -n 's/.*name="last_report_id">\([^<]*\)<.*/\1/p' | head -n 1)"
   TRANSPORT_ERROR="$(printf '%s\n' "$PREFS" | sed -n 's/.*name="last_transport_error">\([^<]*\)<.*/\1/p' | head -n 1)"
+  LIFECYCLE="$(printf '%s\n' "$PREFS" | sed -n 's/.*name="d4b_test_lifecycle">\([^<]*\)<.*/\1/p' | head -n 1)"
   if [ -n "$REPORT_ID" ] || [ -n "$TRANSPORT_ERROR" ]; then
     break
   fi
   sleep 1
 done
+
+printf 'D4B_LIFECYCLE=%s\n' "${LIFECYCLE:-missing}"
 
 if [ -n "$TRANSPORT_ERROR" ] && [ -z "$REPORT_ID" ]; then
   printf 'D4B_TRANSPORT_ERROR=%s\n' "$TRANSPORT_ERROR" >&2
