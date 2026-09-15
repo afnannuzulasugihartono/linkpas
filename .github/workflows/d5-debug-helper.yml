@@ -86,13 +86,14 @@ jobs:
             exit /b 0
           )
           exit /b 0
-          '@ | Set-Content -Encoding ascii fakebin\adb.exe.cmd
-          Copy-Item fakebin\adb.exe.cmd fakebin\adb.cmd
-          "${PWD}\fakebin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          '@ | Set-Content -Encoding ascii fakebin\adb.cmd
 
       - name: Run helper end-to-end with fake ADB
         shell: cmd
-        run: echo.| call LINKPAS-Debug.bat
+        env:
+          LINKPAS_ADB: ${{ github.workspace }}\fakebin\adb.cmd
+          LINKPAS_NO_PAUSE: '1'
+        run: call LINKPAS-Debug.bat
 
       - name: Verify bounded ZIP contents
         shell: pwsh
