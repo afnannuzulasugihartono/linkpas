@@ -1,12 +1,12 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "BLOCKED",
-  "current_checkpoint": "D2",
-  "last_completed_checkpoint": "D1",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1"],
-  "next_action": "Recheck Vercel production deployment dpl_7sAbkoUzdYzafXRztKXmykJ7yPmG. When READY, run the deterministic window-error and promise-rejection Beta validation URLs, verify DIAG_TEST_SENT/report IDs and read both reports back from Supabase. If both pass and core app remains healthy, complete D2 and advance to D3.",
-  "blocker": "Required D2 production deployment dpl_7sAbkoUzdYzafXRztKXmykJ7yPmG is still BUILDING; repository validation rules require stopping at this gate until deployment completes.",
+  "status": "READY",
+  "current_checkpoint": "D3",
+  "last_completed_checkpoint": "D2",
+  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2"],
+  "next_action": "Add the hidden Beta Diagnostics panel according to docs/APK_CHECKPOINTS.md D3.",
+  "blocker": null,
   "roadmap_revision": {
     "reason": "User explicitly requested Beta Diagnostics inside LINKPAS so failures can be inspected through Supabase without relying on screenshots.",
     "inserted_before": "A6",
@@ -14,21 +14,46 @@
     "resume_after_diagnostics": "A6",
     "privacy_rule": "Do not collect affiliate-link contents, clipboard contents, buyer email, raw license keys, passwords, or other user content by default."
   },
-  "in_progress_checkpoint_evidence": {
+  "last_checkpoint_evidence": {
     "checkpoint": "D2",
-    "result": "WAITING_FOR_DEPLOYMENT_VALIDATION",
+    "result": "COMPLETE",
     "collector_source": "src/diagnostics.js",
-    "collector_features": ["window.onerror", "unhandledrejection", "important fetch failures", "service-worker registration failures", "online/offline state", "bounded 20-event breadcrumbs"],
-    "privacy": "Breadcrumbs contain technical event names/counts only; pasted link contents and license values are not recorded.",
+    "collector_features": [
+      "window.onerror",
+      "unhandledrejection",
+      "selected important fetch failures",
+      "service-worker registration failures",
+      "online/offline state",
+      "app/build metadata",
+      "bounded 20-event breadcrumbs"
+    ],
     "diagnostics_endpoint_configured": true,
     "publishable_key_only": true,
     "service_role_committed": false,
-    "build_includes_diagnostics": true,
     "service_worker_cache_version": "linkpas-pwa-v3",
-    "production_validation_hook": "?__linkpas_diag_test=window-error or promise-rejection",
-    "pre_hook_validation_attempt": "Real-browser attempts were executed before deterministic result display was deployed; no matching rows were observed, so they are not accepted as evidence.",
     "validation_deployment_id": "dpl_7sAbkoUzdYzafXRztKXmykJ7yPmG",
-    "validation_deployment_state": "BUILDING"
+    "validation_deployment_state": "READY",
+    "window_error_report_id": "c793cc68-4d8a-4bf5-bb7e-a6a363e318b5",
+    "window_error_report_readback": true,
+    "promise_rejection_report_id": "4adf8183-fd21-4a90-9a55-2bfc815bdbba",
+    "promise_rejection_report_readback": true,
+    "report_page_query_removed": true,
+    "breadcrumbs_sanitized": true,
+    "breadcrumbs_max": 20,
+    "normal_production_sample": {
+      "processed": 7,
+      "unique": 6,
+      "duplicates": 1,
+      "shortlinks": 4,
+      "page_remained_usable": true
+    },
+    "diagnostics_regression_test": "tests/diagnostics.test.js",
+    "local_test_result": "7/7 tests PASS (5 core + 2 diagnostics)",
+    "diagnostic_backend_unavailable_test": "PASS; report() resolves null without throwing",
+    "latest_test_commit": "ba2707083d4e49d326cf1823c9d362f1d0d8ebbd",
+    "latest_production_deployment_id": "dpl_4BFhADzucZgotnRSAoCYM7seZC4c",
+    "latest_production_deployment_state": "READY",
+    "remaining_blocker": null
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
