@@ -2,19 +2,21 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "A6a",
+  "current_checkpoint": "A6a1",
   "last_completed_checkpoint": "D5",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5"],
-  "next_action": "Execute A6a only: test the exact signed A5 APK for install, package/version identity, normal launch, App Links/domain verification, and verified TWA/fullscreen versus browser/custom-tab fallback. Do not start A6b in the same turn.",
+  "next_action": "Execute A6a1 only according to docs/A6A_SUBCHECKPOINTS.md: rebuild the current signed release candidate from Android source equivalent to current main, verify the existing release certificate identity, package/version, checksum, and native D4 diagnostics presence. Do not start A6a2 in the same turn.",
   "blocker": null,
   "roadmap_revision": {
-    "reason": "A6 was split before execution because install/TWA verification, online core behavior, and offline behavior cannot be validated reliably inside one 18-minute checkpoint.",
-    "a6_subcheckpoints": ["A6a", "A6b", "A6c"],
-    "a6a": "signed APK install, launch, and verified TWA/fullscreen",
+    "reason": "A6 was split before execution, and A6a was split again because the signed A5 APK predates D4a/D4b Android-wrapper changes and cannot be the final acceptance binary.",
+    "a6_subcheckpoints": ["A6a1", "A6a2", "A6b", "A6c"],
+    "a6a1": "rebuild and cryptographically verify the current signed release candidate",
+    "a6a2": "fresh install, App Links/domain verification, and verified TWA/fullscreen acceptance",
     "a6b": "online core-function acceptance",
     "a6c": "offline-core acceptance",
+    "supplemental_roadmap": "docs/A6A_SUBCHECKPOINTS.md",
     "resume_after_a6": "A7",
-    "privacy_rule": "Use synthetic/non-sensitive test links only and consult Beta Diagnostics on failures."
+    "privacy_rule": "Use synthetic/non-sensitive test data only; keep signing key/password outside Git and logs; consult Beta Diagnostics on runtime failures."
   },
   "last_checkpoint_evidence": {
     "checkpoint": "D5",
