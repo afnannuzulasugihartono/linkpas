@@ -194,39 +194,66 @@ Acceptance:
 
 Target: 12-15 minutes. Hard stop: 18 minutes.
 
-## A6 — Android acceptance test
-
-Prerequisite: D1-D5 complete so failures encountered during device testing can be diagnosed without relying on screenshots alone.
+## A6a — Signed APK install, launch, and TWA verification
 
 Scope:
-Test the signed APK on Android for:
-- install;
-- launch;
-- verified TWA/fullscreen behavior;
-- paste/process links;
-- deduplication;
-- Free 50-link limit;
-- copy/export behavior;
-- offline core behavior.
+- Test the exact signed A5 APK on Android.
+- Verify install succeeds and package/version match the release identity.
+- Launch normally with Chrome/TWA available.
+- Verify Digital Asset Links/App Links and distinguish verified TWA/fullscreen from browser/custom-tab fallback using Android runtime evidence rather than appearance alone.
 
 Acceptance:
-- Every item is PASS, or blockers are recorded precisely.
-- Diagnostic reports are consulted when a failure occurs.
-- No claim of APK readiness if TWA verification falls back to a browser/custom tab unexpectedly.
+- Signed APK installs successfully.
+- Package is `id.barangpas.linkpas`, version is `0.1.0-beta` / code `1`.
+- Normal launch succeeds without fatal Android wrapper crash.
+- `linkpas.vercel.app` App Links/domain verification is verified for the package.
+- Evidence supports verified TWA/fullscreen rather than browser/custom-tab fallback; otherwise A6a is BLOCKED and APK readiness is not claimed.
 
-Target: 12-15 minutes. Hard stop: 18 minutes. Split the test matrix before execution if all checks cannot reasonably fit.
+Target: 12-15 minutes. Hard stop: 18 minutes.
+
+## A6b — Android online core-function acceptance
+
+Scope:
+- On the installed signed APK with network available, test paste/process links, exact deduplication, Free 50-link limit, copy unique behavior, and TXT/CSV export behavior.
+- Use synthetic/non-sensitive test links only.
+
+Acceptance:
+- Paste/process works in the Android TWA.
+- Deduplication produces the expected unique/duplicate counts.
+- Free mode processes at most 50 links and visibly reports truncation/limit behavior as designed.
+- Copy unique works.
+- TXT and CSV export actions complete successfully.
+- Any failure is correlated with Beta Diagnostics before being classified.
+
+Target: 12-15 minutes. Hard stop: 18 minutes.
+
+## A6c — Android offline-core acceptance
+
+Scope:
+- Prime the installed signed APK online, then remove network connectivity.
+- Relaunch/revisit the app and test the local core workflow with synthetic links.
+- Confirm diagnostics/network failure does not block the local workflow.
+
+Acceptance:
+- Offline shell loads after prior online priming.
+- Local link extraction/classification/deduplication continues to work offline.
+- Diagnostic/network upload failure does not block core processing.
+- Network-dependent license verification may fail gracefully and is not misclassified as failure of the local core.
+- Any blocker is recorded precisely.
+
+Target: 12-15 minutes. Hard stop: 18 minutes.
 
 ## A7 — Fix release-blocking APK issues
 
 Scope:
-- Fix only blockers discovered by A6.
+- Fix only blockers discovered by A6a-A6c.
 - Rebuild/retest only what is necessary.
 
 Acceptance:
-- All A6 release blockers are resolved or checkpoint is explicitly BLOCKED.
+- All A6a-A6c release blockers are resolved or checkpoint is explicitly BLOCKED.
 - Signed APK passes the affected acceptance checks.
 
-If A6 has no release blockers, this checkpoint may complete as a verified no-op.
+If A6a-A6c have no release blockers, this checkpoint may complete as a verified no-op.
 
 Target: 12-15 minutes. Hard stop: 18 minutes. If multiple unrelated blockers exist, split A7 before implementation.
 
