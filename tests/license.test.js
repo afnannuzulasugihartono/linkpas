@@ -13,7 +13,8 @@ test('public config points to backend license verifier', () => {
 
 test('license bootstrap verifies remotely and never reads affiliate input', () => {
   const code = read('src/license.js');
-  assert.match(code, /fetch\(endpoint/);
+  assert.match(code, /diagnosticFetch\(endpoint/);
+  assert.match(code, /diagnostics\?\.fetch \|\|/);
   assert.match(code, /licenseKey/);
   assert.match(code, /localStorage/);
   assert.match(code, /cfg\.mode = 'pro'/);

@@ -1,0 +1,122 @@
+name: D5 Windows Debug Helper
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'LINKPAS-Debug.bat'
+      - 'tests/debug-helper.test.js'
+      - 'tests/license.test.js'
+      - '.github/workflows/d5-debug-helper.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'LINKPAS-Debug.bat'
+      - 'tests/debug-helper.test.js'
+      - 'tests/license.test.js'
+      - '.github/workflows/d5-debug-helper.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  static-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+
+  windows-helper-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build bounded fake ADB executable
+        shell: pwsh
+        run: |
+          dotnet new console --framework net8.0 --output fakeadb --force | Out-Null
+          @'
+          using System;
+
+          if (args.Length == 0) return;
+          var command = args[0];
+          if (command == "start-server") return;
+          if (command == "devices") {
+            Console.WriteLine("List of devices attached");
+            Console.WriteLine("fake-device\tdevice");
+            return;
+          }
+          if (command == "version") {
+            Console.WriteLine("Android Debug Bridge version 1.0.41");
+            return;
+          }
+          if (command == "get-state") {
+            Console.WriteLine("device");
+            return;
+          }
+          if (command == "shell") {
+            if (args.Length >= 3 && args[1] == "pm" && args[2] == "path") {
+              Console.WriteLine("package:/data/app/id.barangpas.linkpas/base.apk");
+              return;
+            }
+            if (args.Length >= 3 && args[1] == "pm" && args[2] == "get-app-links") {
+              Console.WriteLine("id.barangpas.linkpas:");
+              Console.WriteLine("  linkpas.vercel.app: verified");
+              return;
+            }
+            if (args.Length >= 3 && args[1] == "dumpsys" && args[2] == "package") {
+              Console.WriteLine("Package [id.barangpas.linkpas]");
+              Console.WriteLine("versionName=0.1.0-beta");
+              Console.WriteLine("versionCode=1");
+              Console.WriteLine("linkpas.vercel.app verified");
+              Console.WriteLine("com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity enabled=true");
+              return;
+            }
+            if (args.Length >= 3 && args[1] == "dumpsys" && args[2] == "activity") {
+              Console.WriteLine("id.barangpas.linkpas linkpas.vercel.app");
+              return;
+            }
+            if (args.Length >= 2 && args[1] == "pidof") {
+              Console.WriteLine("1234");
+              return;
+            }
+          }
+          if (command == "logcat") {
+            Console.WriteLine("09-15 00:00:00.000 1234 1234 I LINKPAS: id.barangpas.linkpas TrustedWebActivity");
+          }
+          '@ | Set-Content -Encoding utf8 fakeadb\Program.cs
+          dotnet build fakeadb --configuration Release --nologo | Out-Null
+
+      - name: Run helper end-to-end with fake ADB
+        shell: cmd
+        run: |
+          set "LINKPAS_ADB=%CD%\fakeadb\bin\Release\net8.0\fakeadb.exe"
+          set "LINKPAS_NO_PAUSE=1"
+          call LINKPAS-Debug.bat
+
+      - name: Verify bounded ZIP contents
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem 'LINKPAS-Debug-*.zip' | Select-Object -First 1
+          if (-not $zip) { throw 'No LINKPAS debug ZIP was produced.' }
+          Expand-Archive -LiteralPath $zip.FullName -DestinationPath extracted -Force
+          $required = @(
+            'README.txt',
+            'adb-version.txt',
+            'device-state.txt',
+            'package-path.txt',
+            'app-links.txt',
+            'package-app-links.txt',
+            'activity.txt',
+            'wrapper-logcat.txt',
+            'system-filtered-logcat.txt'
+          )
+          foreach ($name in $required) {
+            if (-not (Test-Path (Join-Path 'extracted' $name))) { throw "Missing $name" }
+          }
+          if (Test-Path 'extracted\devices.txt') { throw 'Device serial inventory must not be stored.' }
