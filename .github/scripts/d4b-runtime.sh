@@ -52,6 +52,9 @@ sleep 1
 ANDROID_RUNTIME_ERRORS="$(adb logcat -d -v brief AndroidRuntime:E '*:S' 2>/dev/null || true)"
 if printf '%s\n' "$ANDROID_RUNTIME_ERRORS" | grep -Fq "Process: $PACKAGE"; then
   echo 'D4B_NORMAL_LAUNCH_FATAL=detected' >&2
+  echo 'D4B_ANDROIDRUNTIME_BEGIN' >&2
+  printf '%s\n' "$ANDROID_RUNTIME_ERRORS" | tail -n 60 >&2
+  echo 'D4B_ANDROIDRUNTIME_END' >&2
   exit 1
 fi
 
