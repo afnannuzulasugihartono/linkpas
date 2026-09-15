@@ -5,7 +5,7 @@
   "current_checkpoint": "A6a2e",
   "last_completed_checkpoint": "A6a2d",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d"],
-  "next_action": "Resume A6a2e only using the signed automatic-diagnostics recovery RC from PR #12. Install/update LINKPAS-v0.1.0-beta-rc.apk with SHA-256 2c6ff583ae5a7258b3568ac163e1ff373953a8a530d83a9a16d1b3fa37e0ca66, open LINKPAS normally once, then inspect Supabase for either correlated native_self_check/native_twa_evidence/pwa_launch_probe reports sharing one probe_id or the automatic pwa_startup_no_probe beacon. Do not require ADB unless this repaired automatic path is again exhausted. Do not start A6b unless PASS_VERIFIED_TWA is proven.",
+  "next_action": "Resume A6a2e only using the signed automatic-diagnostics recovery RC from PR #12. Install/update LINKPAS-v0.1.0-beta-rc.apk with SHA-256 2c6ff583ae5a7258b3568ac163e1ff373953a8a530d83a9a16d1b3fa37e0ca66 and open LINKPAS normally once. Inspect Supabase for durable native_self_check/native_twa_evidence and the existing production A6a2c pwa_launch_probe correlation. The enhanced pwa_startup_no_probe beacon/service-worker v6 is merged but production deployment is temporarily deferred by Vercel Hobby build-rate-limit; this does not prevent testing the repaired native durable/retry path against the already-live A6a2c PWA probe handshake. Do not require ADB unless this repaired automatic path is again exhausted. Do not start A6b unless PASS_VERIFIED_TWA is proven.",
   "blocker": null,
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit inside one 18-minute checkpoint.",
@@ -121,7 +121,7 @@
     "reliability_changes": {
       "native": "Automatic native self-check/TWA evidence is persisted before transport in a bounded local outbox, retried with bounded delays, retained for the next launch after transport failure, and preserves its original probe ID across later launches.",
       "pwa": "Diagnostic uploads are serialized rather than dropped while another upload is in flight; automatic launch/startup reports retry; pwa_startup_no_probe distinguishes a live PWA from a missing native handshake.",
-      "service_worker": "Cache generation bumped from linkpas-pwa-v5 to linkpas-pwa-v6 so the repaired diagnostics bundle replaces stale cached diagnostics code.",
+      "service_worker": "Cache generation bumped from linkpas-pwa-v5 to linkpas-pwa-v6 so the repaired diagnostics bundle replaces stale cached diagnostics code once the next production web deployment is permitted.",
       "privacy": "No affiliate-link content, clipboard content, buyer email, license value, credentials, signing material, screenshots, file contents, or device identifier was added to diagnostics."
     },
     "signed_recovery_rc": {
@@ -135,6 +135,14 @@
       "signature_v1": "pass",
       "signature_v2": "pass",
       "signature_v3": "pass"
+    },
+    "production_web": {
+      "current_cache_generation": "linkpas-pwa-v5",
+      "current_has_baseline_a6a2c_probe_handshake": true,
+      "enhanced_cache_generation": "linkpas-pwa-v6",
+      "enhanced_no_probe_beacon": "pwa_startup_no_probe",
+      "enhanced_deployment_status": "deferred_vercel_hobby_build_rate_limit",
+      "vercel_status_context": "Vercel failure target indicates upgradeToPro=build-rate-limit on the current main commit."
     },
     "retry_status": "ready_for_real_device_retry"
   },
