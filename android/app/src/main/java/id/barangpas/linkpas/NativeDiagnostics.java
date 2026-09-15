@@ -40,6 +40,7 @@ final class NativeDiagnostics {
         markStage(app, "launcher_init");
         installCrashHandler(app);
         flushPendingAsync(app);
+        AutomaticDiagnosticOutbox.flushAsync(app);
         if (BuildConfig.VERSION_NAME.contains("-beta")) {
             emitNativeSelfCheckAsync(app);
         }
@@ -60,17 +61,18 @@ final class NativeDiagnostics {
                                      String stage) {
         if (!BuildConfig.VERSION_NAME.contains("-beta")) return;
         Context app = context.getApplicationContext();
-        emitAsync(
+        String probeId = LaunchProbeId.current();
+        String payload = buildTwaEvidencePayload(
                 app,
-                buildTwaEvidencePayload(
-                        app,
-                        browserProvider,
-                        relationshipState,
-                        relationshipDetail,
-                        fallbackInvoked,
-                        stage),
-                false,
-                null);
+                browserProvider,
+                relationshipState,
+                relationshipDetail,
+                fallbackInvoked,
+                stage,
+                probeId);
+        new Thread(
+                () -> AutomaticDiagnosticOutbox.enqueue(app, payload),
+                "linkpas-twa-evidence").start();
     }
 
     static void markStage(Context context, String stage) {
@@ -142,28 +144,10 @@ final class NativeDiagnostics {
     }
 
     private static void emitNativeSelfCheckAsync(Context context) {
+        String probeId = LaunchProbeId.current();
         new Thread(() -> {
-            String payload = buildSelfCheckPayload(context);
-            String reportId = NativeDiagnosticTransport.post(
-                    BuildConfig.DIAGNOSTICS_ENDPOINT,
-                    BuildConfig.DIAGNOSTICS_PUBLISHABLE_KEY,
-                    payload);
-            try {
-                SharedPreferences.Editor editor =
-                        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
-                if (reportId != null) {
-                    editor.remove(KEY_LAST_TRANSPORT_ERROR)
-                            .putString(KEY_LAST_REPORT, reportId)
-                            .apply();
-                } else {
-                    editor.putString(KEY_LAST_TRANSPORT_ERROR,
-                            NativeDiagnosticSanitizer.redact(
-                                    NativeDiagnosticTransport.getLastFailureCode(), 80))
-                            .apply();
-                }
-            } catch (Exception ignored) {
-                // Self-check reporting must never affect normal launch.
-            }
+            String payload = buildSelfCheckPayload(context, probeId);
+            AutomaticDiagnosticOutbox.enqueue(context, payload);
         }, "linkpas-self-check").start();
     }
 
@@ -199,7 +183,7 @@ final class NativeDiagnostics {
         }, "linkpas-diag-send").start();
     }
 
-    private static String buildSelfCheckPayload(Context context) {
+    private static String buildSelfCheckPayload(Context context, String probeId) {
         try {
             JSONObject diagnostics = NativeSelfCheck.collect(context);
             diagnostics.put("app_stage", "native_self_check");
@@ -207,6 +191,7 @@ final class NativeDiagnostics {
             diagnostics.put("release_channel", "beta");
             diagnostics.put("launch_url_host", NativeSelfCheck.HOST);
             diagnostics.put("launch_url_path", "/");
+            if (LaunchProbeId.isValid(probeId)) diagnostics.put("probe_id", probeId);
 
             JSONObject root = new JSONObject();
             root.put("source", "android");
@@ -240,7 +225,8 @@ final class NativeDiagnostics {
                                                   String relationshipState,
                                                   String relationshipDetail,
                                                   boolean fallbackInvoked,
-                                                  String stage) {
+                                                  String stage,
+                                                  String probeId) {
         try {
             String safeProvider = NativeDiagnosticSanitizer.redact(browserProvider, 120);
             String safeRelationshipState = NativeDiagnosticSanitizer.redact(relationshipState, 40);
@@ -285,6 +271,7 @@ final class NativeDiagnostics {
             diagnostics.put("fallback_kind", fallbackInvoked ? "custom_tabs" : "not_observed");
             diagnostics.put("release_channel", "beta");
             diagnostics.put("target_host", NativeSelfCheck.HOST);
+            if (LaunchProbeId.isValid(probeId)) diagnostics.put("probe_id", probeId);
             root.put("diagnostics", diagnostics);
             return root.toString();
         } catch (Exception ignored) {
