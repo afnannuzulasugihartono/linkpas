@@ -4,9 +4,9 @@ title LINKPAS Beta Diagnostics
 
 set "PACKAGE=id.barangpas.linkpas"
 set "HOST=linkpas.vercel.app"
-set "ADB=adb.exe"
+set "ADB=adb"
 
-where adb.exe >nul 2>&1
+where adb >nul 2>&1
 if errorlevel 1 (
   if exist "%~dp0platform-tools\adb.exe" (
     set "ADB=%~dp0platform-tools\adb.exe"
