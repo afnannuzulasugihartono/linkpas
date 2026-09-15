@@ -2,177 +2,74 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "A6a2e",
-  "last_completed_checkpoint": "A6a2d",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d"],
-  "next_action": "Resume A6a2e only using the distinctly versioned signed recovery RC LINKPAS-v0.1.0-beta.2-rc.apk with SHA-256 64d87aa2cef249a1bd923e74edff18128260a7c6aa6ed9b02078a17f64707f27, versionName 0.1.0-beta.2 and versionCode 2. Install/update it and open LINKPAS normally once, then inspect Supabase. A native report from the correct binary must show app_version=0.1.0-beta.2 and build_version=2; only then evaluate native_self_check/native_twa_evidence and PWA probe correlation. Do not require ADB unless this distinctly versioned automatic path is again exhausted. Do not start A6b unless PASS_VERIFIED_TWA is proven.",
+  "current_checkpoint": "A6b",
+  "last_completed_checkpoint": "A6a2e",
+  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e"],
+  "next_action": "Execute A6b only according to docs/APK_CHECKPOINTS.md. On the installed signed LINKPAS 0.1.0-beta.2 / code 2 APK with network available, validate the Android TWA online core workflow using synthetic non-sensitive links: paste/process, exact deduplication, Free 50-link limit and visible truncation behavior, copy unique, and TXT/CSV export. Correlate any failure with Beta Diagnostics before classifying it. Do not start A6c in the same turn.",
   "blocker": null,
   "roadmap_revision": {
-    "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit inside one 18-minute checkpoint.",
+    "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 was split because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance.",
     "a6_subcheckpoints": ["A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b", "A6c"],
-    "a6a1": "rebuild and cryptographically verify the current signed release candidate",
-    "a6a2a": "native signer/App Links/browser-TWA-capability self-check primitives",
-    "a6a2b": "browser Digital Asset Links relationship validation plus observable Custom Tab fallback",
-    "a6a2c": "automatic PWA launch handshake, Supabase correlation, and deterministic verdict rules",
-    "a6a2d": "rebuild/sign the automatic-diagnostics release candidate",
-    "a6a2e": "real-device automatic acceptance from Supabase evidence; routine path requires no ADB",
-    "a6b": "online core-function acceptance",
-    "a6c": "offline-core acceptance",
     "supplemental_roadmap": "docs/A6A_SUBCHECKPOINTS.md",
     "resume_after_a6": "A7",
     "automatic_verification_policy": "Normal A6a2 path must not require user-run ADB or screenshots. Public Android/browser evidence is evaluated first. Callback timeout/unknown is INCONCLUSIVE, never guessed. ADB is a last-resort fallback only after automatic evidence is exhausted.",
-    "privacy_rule": "Use synthetic/non-sensitive test data only; probe IDs must be random technical IDs with no user data; keep signing key/password outside Git and logs; diagnostics collect technical metadata only."
+    "privacy_rule": "Use synthetic/non-sensitive test data only; probe IDs contain no user data; keep signing key/password outside Git and logs; diagnostics collect technical metadata only."
   },
   "last_checkpoint_evidence": {
-    "checkpoint": "A6a2d",
+    "checkpoint": "A6a2e",
     "result": "PASS",
+    "verdict": "PASS_VERIFIED_TWA",
     "artifact": {
-      "filename": "LINKPAS-v0.1.0-beta-a6a2d-rc.apk",
-      "sha256": "8779752cddb6fe4af0a4ff9ed52e2001d009e699a88435f426ec2d22462c1fe5",
-      "size_bytes": 3810192,
-      "package": "id.barangpas.linkpas",
-      "version_name": "0.1.0-beta",
-      "version_code": 1
-    },
-    "source": {
-      "validation_head_sha": "09e6114e7f145dca4b1dcca001e2935847819ffe",
-      "product_merge_sha": "66643df37e46ebf835d442e0c9b6d9d5de996019",
-      "main_at_validation_start": "30ffd8fc8eb8289133ffbab70b6161d3e2f5a066",
-      "equivalence": "GitHub compare from validation head to main shows only PROJECT_STATE.json changed; Android/product source used by the release artifact did not drift."
-    },
-    "ci": {
-      "release_run_id": 34943098218,
-      "android_unit_tests": "success",
-      "unsigned_release_build": "success",
-      "unsigned_artifact_id": 10385453725
-    },
-    "signing": {
-      "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6",
-      "signers": 1,
-      "v1": "pass",
-      "v2": "pass",
-      "v3": "pass",
-      "identity": "Matches the existing A4 release certificate fingerprint published in Digital Asset Links.",
-      "secret_handling": "Private keystore/password were used only from the existing private signing backup outside Git and were not written to repository files or diagnostic logs."
-    },
-    "instrumentation": {
-      "manifest_package": "present",
-      "manifest_version_name": "present",
-      "manifest_host": "linkpas.vercel.app present",
-      "LaunchProbeId": "present in classes.dex",
-      "NativeSelfCheck": "present in classes.dex",
-      "BrowserDalValidator": "present in classes.dex",
-      "BrowserTwaEvidence": "present in classes.dex",
-      "launch_probe_marker": "__linkpas_probe present in classes.dex",
-      "native_self_check_marker": "present in classes.dex",
-      "native_twa_evidence_marker": "present in classes.dex"
-    },
-    "remaining_blocker": null
-  },
-  "a6a2e_attempt_evidence": {
-    "verdict": "NEEDS_ADB",
-    "reason": "automatic_evidence_incomplete",
-    "distributed_apk_sha256": "8779752cddb6fe4af0a4ff9ed52e2001d009e699a88435f426ec2d22462c1fe5",
-    "distributed_apk_matches_a6a2d": true,
-    "production_deployment_commit": "30ffd8fc8eb8289133ffbab70b6161d3e2f5a066",
-    "production_launch_probe_present": true,
-    "production_automatic_pwa_probe_present": true,
-    "attempts": 2,
-    "contemporaneous_reports": [
-      {
-        "report_id": "bc25102a-b663-4b72-90ca-c7603371bf71",
-        "source": "pwa",
-        "error_type": "manual_diagnostic",
-        "created_at": "2026-09-15T08:25:57.443235Z",
-        "service_worker_state": "controlled",
-        "probe_id_present": false
-      },
-      {
-        "report_id": "b528909a-596a-4ced-8f25-054a32e1e8ba",
-        "source": "pwa",
-        "error_type": "manual_diagnostic",
-        "created_at": "2026-09-15T09:03:12.277152Z",
-        "service_worker_state": "controlled",
-        "probe_id_present": false
-      }
-    ],
-    "native_self_check_observed": false,
-    "native_twa_evidence_observed": false,
-    "pwa_launch_probe_observed": false,
-    "automatic_evidence_exhausted": true,
-    "fallback_required": "LINKPAS-Debug.bat bounded ADB collection",
-    "superseded_by_automatic_recovery": true
-  },
-  "automatic_recovery": {
-    "requested_by_user": true,
-    "product_pr": 12,
-    "product_merge_sha": "67e75a9a8569a5c2525c9071121e7208f1661efa",
-    "validation_head_sha": "9d90c6d4ce91dc69763905d5d4dcc04f17abcd7a",
-    "ci": {
-      "web_run_id": 34951630858,
-      "web_tests": "success",
-      "debug_run_id": 34951630880,
-      "debug_build": "success",
-      "release_run_id": 34951630905,
-      "android_unit_tests": "success",
-      "unsigned_release_build": "success",
-      "unsigned_artifact_id": 10389781472
-    },
-    "reliability_changes": {
-      "native": "Automatic native self-check/TWA evidence is persisted before transport in a bounded local outbox, retried with bounded delays, retained for the next launch after transport failure, and preserves its original probe ID across later launches.",
-      "pwa": "Diagnostic uploads are serialized rather than dropped while another upload is in flight; automatic launch/startup reports retry; pwa_startup_no_probe distinguishes a live PWA from a missing native handshake.",
-      "service_worker": "Cache generation bumped from linkpas-pwa-v5 to linkpas-pwa-v6 so the repaired diagnostics bundle replaces stale cached diagnostics code once the next production web deployment is permitted.",
-      "privacy": "No affiliate-link content, clipboard content, buyer email, license value, credentials, signing material, screenshots, file contents, or device identifier was added to diagnostics."
-    },
-    "signed_recovery_rc": {
-      "filename": "LINKPAS-v0.1.0-beta-rc.apk",
-      "sha256": "2c6ff583ae5a7258b3568ac163e1ff373953a8a530d83a9a16d1b3fa37e0ca66",
-      "size_bytes": 3814288,
-      "package": "id.barangpas.linkpas",
-      "version_name": "0.1.0-beta",
-      "version_code": 1,
-      "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6",
-      "signature_v1": "pass",
-      "signature_v2": "pass",
-      "signature_v3": "pass",
-      "superseded": true
-    },
-    "versioned_recovery_rc": {
-      "reason": "The first recovery APK had different bytes but retained versionName 0.1.0-beta and versionCode 1, so on-device replacement could not be proven unambiguously. This build has a distinct Android version identity.",
-      "product_pr": 13,
-      "validation_head_sha": "9ccdca977fc5ffcc984b5b80b531bbdd269da681",
-      "merge_sha": "26b82aff33d2b59d9845b463133263f58951fcac",
-      "debug_run_id": 34973912053,
-      "debug_build": "success",
-      "release_run_id": 34973911914,
-      "android_unit_tests": "success",
-      "unsigned_release_build": "success",
-      "unsigned_artifact_id": 10398583165,
       "filename": "LINKPAS-v0.1.0-beta.2-rc.apk",
       "sha256": "64d87aa2cef249a1bd923e74edff18128260a7c6aa6ed9b02078a17f64707f27",
-      "size_bytes": 3814288,
       "package": "id.barangpas.linkpas",
       "version_name": "0.1.0-beta.2",
       "version_code": 2,
-      "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6",
-      "signature_v1": "pass",
-      "signature_v2": "pass",
-      "signature_v3": "pass",
-      "instrumentation_markers": ["AutomaticDiagnosticOutbox", "native_self_check", "native_twa_evidence"],
-      "expected_native_report_identity": {
-        "app_version": "0.1.0-beta.2",
-        "build_version": "2"
-      }
+      "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6"
     },
-    "production_web": {
-      "current_cache_generation": "linkpas-pwa-v5",
-      "current_has_baseline_a6a2c_probe_handshake": true,
-      "enhanced_cache_generation": "linkpas-pwa-v6",
-      "enhanced_no_probe_beacon": "pwa_startup_no_probe",
-      "enhanced_deployment_status": "deferred_vercel_hobby_build_rate_limit",
-      "vercel_status_context": "Vercel failure target indicates upgradeToPro=build-rate-limit on the current main commit."
+    "probe_id": "415fa628-3cbd-4d66-b1ea-ab28c25b714e",
+    "supabase_reports": {
+      "pwa_launch_probe": "20916d82-3ce9-4472-84d4-14645b492135",
+      "native_self_check": "fde6404b-b40b-41df-ac4f-fced001deec5",
+      "native_twa_launch": "3d953510-479b-48ab-950c-d47950f5303b",
+      "native_dal_result": "2fad79a6-fd56-4be2-99de-4df878335f8a"
     },
-    "retry_status": "ready_for_beta2_real_device_retry"
+    "mandatory_positive_evidence": {
+      "native_identity": "app_version=0.1.0-beta.2 and build_version=2",
+      "signer_state": "match",
+      "signer_match": true,
+      "app_links_state": "verified",
+      "link_handling_allowed": true,
+      "browser_provider": "com.android.chrome",
+      "twa_capable_provider": "com.android.chrome",
+      "twa_launch_requested": true,
+      "dal_relation": "delegate_permission/common.handle_all_urls",
+      "dal_relationship_state": "true",
+      "dal_relationship_detail": "callback_result",
+      "fallback_invoked": false,
+      "fallback_state": "not_observed",
+      "pwa_probe_observed": true,
+      "pwa_probe_source": "android_twa_launch",
+      "pwa_service_worker_state": "controlled",
+      "pwa_online": true,
+      "correlation": "All four reports share the same valid random probe_id."
+    },
+    "twa_capability_interpretation": "NativeSelfCheck only reports a concrete twa_capable_provider after Android PackageManager discovers a service advertising androidx.browser.trusted.category.TrustedWebActivities; the observed provider is com.android.chrome and matches the selected browser provider.",
+    "failure_evidence": {
+      "fallback_observed": false,
+      "dal_false_observed": false,
+      "signer_mismatch_observed": false,
+      "app_links_unverified_observed": false
+    },
+    "privacy": "Evidence contains only technical metadata and random probe correlation; no user content, clipboard data, affiliate links, buyer email, license values, credentials, signing material, screenshots, files, or device identifiers were required.",
+    "remaining_blocker": null
+  },
+  "recovery_history": {
+    "automatic_diagnostics_pr": 12,
+    "automatic_diagnostics_merge_sha": "67e75a9a8569a5c2525c9071121e7208f1661efa",
+    "versioned_recovery_pr": 13,
+    "versioned_recovery_merge_sha": "26b82aff33d2b59d9845b463133263f58951fcac",
+    "note": "Earlier inconclusive/NEEDS_ADB attempts were superseded by the durable automatic diagnostics recovery and distinctly versioned beta.2 RC. ADB was ultimately not required for A6a2e."
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
