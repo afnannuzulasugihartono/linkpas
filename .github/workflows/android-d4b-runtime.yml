@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/android-d4b-runtime.yml'
       - '.github/scripts/d4b-runtime.sh'
+      - 'android/app/src/main/java/id/barangpas/linkpas/NativeDiagnostics.java'
+      - 'android/app/src/main/java/id/barangpas/linkpas/NativeDiagnosticTransport.java'
 
 permissions:
   contents: read
@@ -49,7 +51,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -dns-server 8.8.8.8,1.1.1.1
           script: bash .github/scripts/d4b-runtime.sh
 
       - name: Upload D4b report ID evidence
