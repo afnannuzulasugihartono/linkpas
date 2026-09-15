@@ -26,4 +26,9 @@ final class LaunchProbeId {
     static String current() {
         return current;
     }
+
+    static String preferExisting(String existingProbe, String currentProbe) {
+        if (isValid(existingProbe)) return existingProbe;
+        return isValid(currentProbe) ? currentProbe : null;
+    }
 }
