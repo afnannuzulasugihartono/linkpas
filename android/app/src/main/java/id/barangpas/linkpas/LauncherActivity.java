@@ -29,7 +29,7 @@ public class LauncherActivity
     protected void onCreate(Bundle savedInstanceState) {
         controlledDiagnosticTest = NativeDiagnostics.isControlledTest(getIntent());
         launchProbeId = BuildConfig.VERSION_NAME.contains("-beta") ? LaunchProbeId.create() : null;
-        NativeDiagnostics.setLaunchProbeId(launchProbeId);
+        LaunchProbeId.setCurrent(launchProbeId);
         NativeDiagnostics.install(this, getIntent());
         NativeDiagnostics.markStage(this, "launcher_on_create");
         super.onCreate(savedInstanceState);
