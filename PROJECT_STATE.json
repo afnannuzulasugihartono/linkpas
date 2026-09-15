@@ -2,10 +2,10 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "D5",
-  "last_completed_checkpoint": "D4b",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b"],
-  "next_action": "Execute D5 only: validate the end-to-end LINKPAS Beta failure -> Supabase report -> ChatGPT/Supabase inspection workflow, define operational semantics for `cek LINKPAS`, and add the bounded Windows ADB fallback helper required by the roadmap. Do not start A6 in the same turn.",
+  "current_checkpoint": "A6",
+  "last_completed_checkpoint": "D5",
+  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5"],
+  "next_action": "Execute A6 only: test the signed APK for install, launch, verified TWA/fullscreen behavior, paste/process links, deduplication, Free 50-link limit, copy/export behavior, and offline core behavior. Consult diagnostic reports on any failure, and split A6 before execution if the full matrix cannot reasonably fit inside 18 minutes.",
   "blocker": null,
   "roadmap_revision": {
     "reason": "D4 was split before implementation because Android runtime/emulator validation plus build verification cannot be bounded reliably inside one 18-minute checkpoint.",
@@ -15,52 +15,80 @@
     "privacy_rule": "Do not collect affiliate-link contents, clipboard contents, buyer email, raw license keys, passwords, device identifiers, or other user content by default."
   },
   "last_checkpoint_evidence": {
-    "checkpoint": "D4b",
+    "checkpoint": "D5",
     "result": "PASS",
-    "validation_pr": 6,
-    "validation_pr_disposition": "closed unmerged after validation-only harness completed",
-    "product_pr": 7,
-    "product_merge_sha": "f0e969b8f437d642bdd955664e8dfa7e1eec254d",
-    "runtime": "Android emulator API 35 google_apis x86_64",
-    "final_runtime_run_id": 34922418793,
-    "final_runtime_result": "success",
-    "runtime_build": "PASS",
-    "runtime_install": "PASS",
-    "controlled_trigger_activity_launch": "PASS; Status: ok",
-    "controlled_lifecycle": "transport_returned",
-    "runtime_report_id": "fd0b0540-45da-4f63-ae17-6580cffc47b3",
-    "supabase_readback": {
-      "verified": true,
-      "source": "android",
-      "error_type": "native_controlled_test",
-      "app_version": "0.1.0-beta",
-      "build_version": "1",
-      "package_name": "id.barangpas.linkpas",
-      "platform": "android",
-      "platform_version": "sdk-35",
-      "browser": "com.android.chrome",
+    "product_pr": 8,
+    "product_merge_sha": "2b032a6c16d9f9fa15469742e2b837fb299ff609",
+    "controlled_beta_validation": {
+      "browser_run_id": "1af0567f-9d28-4f2f-a0e9-0f0bca677b73",
+      "trigger": "production PWA controlled window-error diagnostic hook",
+      "supabase_report_id": "70357fff-8d80-4a68-8187-bea7ae5e9924",
+      "source": "pwa",
+      "error_type": "window_error",
       "page": "https://linkpas.vercel.app/",
-      "breadcrumb_state": "controlled_test",
-      "technical_metadata_only": true
+      "breadcrumbs": ["app_boot", "app_ready", "window_error"],
+      "app_stage": "runtime",
+      "network_state": "online",
+      "line": 194,
+      "column": 32,
+      "file_value": "[url]",
+      "inspection_without_screenshot": true,
+      "repository_correlation": "The current src/diagnostics.js controlled window-error branch deliberately throws LINKPAS_DIAG_TEST_WINDOW_ERROR; this supports identifying the controlled failure class without claiming an unrelated product root cause.",
+      "evidence_levels": ["OBSERVED", "LIKELY", "NEEDS_ADB"]
     },
-    "normal_launch_after_diagnostics": "PASS; Status: ok; D4B_NORMAL_LAUNCH_FATAL=none",
-    "root_causes_resolved": [
-      "The controlled diagnostic thread could outlive the Android Browser Helper LauncherActivity TWA handoff. The Beta controlled-test path now delays TWA launch only until diagnostic completion or a hard 5-second maximum, while normal launch remains immediate.",
-      "Android Browser Helper 2.7.3 launch attempted to enable ManageDataLauncherActivity, but that component was absent from the manifest. The standard TWA manage-space activity declaration was added."
-    ],
-    "product_ci": {
-      "debug_run_id": 34922729050,
-      "debug_result": "success",
-      "release_run_id": 34922728954,
-      "release_result": "success"
+    "cek_linkpas_semantics": {
+      "documented_in": "docs/BETA_DIAGNOSTICS.md",
+      "newest_report_strategy": "Inspect newest relevant reports ordered by created_at desc; if an exact user-supplied report ID misses, inspect newest rows rather than guessing from a transcribed display value.",
+      "correlation_fields": ["source", "error_type", "app/build version", "page", "breadcrumbs", "diagnostics", "created_at"],
+      "no_guessing_rule": "Only map to a file/function when stack, file/line/column, or distinctive error metadata supports it; state sanitizer limitations such as [url] or [token].",
+      "screen_visibility_claim": false,
+      "unsolicited_chat_delivery_claim": false
     },
-    "privacy": "Validated Android report contains sanitized technical metadata only. No personal data, affiliate-link contents, clipboard contents, raw license values, signing secrets, credentials, or device identifiers were intentionally collected or stored.",
-    "non_blocking": "D4a tests cover transport failure as non-throwing; D4b normal startup remained usable after diagnostics initialization and the controlled test has a 5-second hard launch deadline.",
-    "adb_logcat_limitations": [
-      "Native telemetry can observe wrapper startup, selected browser, controlled/native exceptions, and diagnostic transport state, but it cannot prove verified TWA/fullscreen rendering versus browser/custom-tab fallback.",
-      "Digital Asset Links/App Links verification state and browser-side TWA verification failures may still require adb shell dumpsys/package domain verification and logcat.",
-      "Failures that terminate the wrapper before pending crash persistence or before diagnostics initialization may still require ADB/logcat."
-    ]
+    "adb_fallback": {
+      "helper": "LINKPAS-Debug.bat",
+      "one_click_windows": true,
+      "requires_exactly_one_authorized_device": true,
+      "bounded_outputs": [
+        "README.txt",
+        "adb-version.txt",
+        "device-state.txt",
+        "package-path.txt",
+        "app-links.txt",
+        "package-app-links.txt",
+        "activity.txt",
+        "wrapper-logcat.txt",
+        "system-filtered-logcat.txt"
+      ],
+      "logcat_limits": {
+        "wrapper_process_lines": 400,
+        "system_filtered_lines": 800
+      },
+      "privacy_exclusions": [
+        "adb bugreport",
+        "screenshots",
+        "screen recordings",
+        "clipboard",
+        "user storage pulls",
+        "arbitrary device files",
+        "device serial inventory"
+      ],
+      "use_when": [
+        "verified TWA/fullscreen versus browser/custom-tab fallback",
+        "Digital Asset Links/App Links verification",
+        "browser/TWA failures not emitted by wrapper telemetry",
+        "crashes before diagnostics can persist a report"
+      ]
+    },
+    "validation_ci": {
+      "workflow": "D5 Windows Debug Helper",
+      "run_id": 34923946988,
+      "static_tests": "success",
+      "windows_helper_smoke": "success",
+      "windows_zip_contents_verified": true,
+      "existing_license_test_update": "Test-only correction: assertion now matches the established diagnostics.fetch wrapper used by src/license.js; no product behavior changed."
+    },
+    "privacy": "D5 diagnostics inspection and the Windows fallback are bounded to technical metadata. They do not intentionally collect affiliate-link contents, clipboard contents, buyer email, raw license values, passwords, signing secrets, credentials, device identifiers, screenshots, or unrelated device content.",
+    "remaining_blocker": null
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
