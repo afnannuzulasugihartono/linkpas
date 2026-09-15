@@ -1,15 +1,42 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "READY",
+  "status": "BLOCKED",
   "current_checkpoint": "A6b",
   "last_completed_checkpoint": "A6a2e",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e"],
-  "next_action": "Execute A6b only according to docs/APK_CHECKPOINTS.md. On the installed signed LINKPAS 0.1.0-beta.2 / code 2 APK with network available, validate the Android TWA online core workflow using synthetic non-sensitive links: paste/process, exact deduplication, Free 50-link limit and visible truncation behavior, copy unique, and TXT/CSV export. Correlate any failure with Beta Diagnostics before classifying it. Do not start A6c in the same turn.",
-  "blocker": null,
+  "completed_checkpoints": [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "D1",
+    "D2",
+    "D3",
+    "D4a",
+    "D4b",
+    "D5",
+    "A6a1",
+    "A6a2a",
+    "A6a2b",
+    "A6a2c",
+    "A6a2d",
+    "A6a2e"
+  ],
+  "next_action": "Resume A6b only. On the installed signed LINKPAS 0.1.0-beta.2 / code 2 APK with network available, use the supplied 55-link synthetic dataset, verify 50 processed / 5 truncated / 49 unique / 1 duplicate, run Copy unique, TXT export, and CSV export, then open the hidden Beta Diagnostics panel by tapping the version label 5 times and send one manual diagnostic report. Read that Supabase report to verify process_complete/copy_clean/export_txt/export_csv breadcrumbs; user confirmation is still required that both downloaded files appeared on the Android device. Do not start A6c.",
+  "blocker": "A6b requires real-device Android TWA interaction for clipboard and file-download acceptance. Automated core precheck is green; awaiting the bounded synthetic device test and manual diagnostic report.",
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 was split because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance.",
-    "a6_subcheckpoints": ["A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b", "A6c"],
+    "a6_subcheckpoints": [
+      "A6a1",
+      "A6a2a",
+      "A6a2b",
+      "A6a2c",
+      "A6a2d",
+      "A6a2e",
+      "A6b",
+      "A6c"
+    ],
     "supplemental_roadmap": "docs/A6A_SUBCHECKPOINTS.md",
     "resume_after_a6": "A7",
     "automatic_verification_policy": "Normal A6a2 path must not require user-run ADB or screenshots. Public Android/browser evidence is evaluated first. Callback timeout/unknown is INCONCLUSIVE, never guessed. ADB is a last-resort fallback only after automatic evidence is exhausted.",
@@ -63,6 +90,42 @@
     },
     "privacy": "Evidence contains only technical metadata and random probe correlation; no user content, clipboard data, affiliate links, buyer email, license values, credentials, signing material, screenshots, files, or device identifiers were required.",
     "remaining_blocker": null
+  },
+  "a6b_attempt_evidence": {
+    "phase": "real_device_interaction_pending",
+    "installed_artifact": "LINKPAS-v0.1.0-beta.2-rc.apk",
+    "network_required": true,
+    "synthetic_dataset_file": "LINKPAS-A6b-test-55-links.txt",
+    "synthetic_dataset_candidates": 55,
+    "expected": {
+      "processed_count": 50,
+      "truncated_count": 5,
+      "unique_count": 49,
+      "duplicate_count": 1,
+      "copy_unique_count": 49,
+      "txt_unique_lines": 49,
+      "csv_valid_rows": 50
+    },
+    "repository_core_tests": {
+      "dedup_exact": "covered",
+      "free_limit_50": "covered",
+      "csv_columns": "covered",
+      "web_ci_run_id": 34951630858,
+      "web_ci_build": "success",
+      "web_ci_tests": "success"
+    },
+    "runtime_breadcrumbs_expected": [
+      "process_complete",
+      "copy_clean",
+      "export_txt",
+      "export_csv",
+      "manual_diagnostic_report"
+    ],
+    "download_confirmation_required": [
+      "TXT file appears on Android device",
+      "CSV file appears on Android device"
+    ],
+    "automation_note": "TinyFish strict-mode smoke test could not start because the connected account is not enabled for strict agent mode; no browser-run evidence was claimed."
   },
   "recovery_history": {
     "automatic_diagnostics_pr": 12,
