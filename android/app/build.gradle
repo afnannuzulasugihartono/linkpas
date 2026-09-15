@@ -10,8 +10,8 @@ android {
         applicationId 'id.barangpas.linkpas'
         minSdk 23
         targetSdk 35
-        versionCode 1
-        versionName '0.1.0-beta'
+        versionCode 2
+        versionName '0.1.0-beta.2'
         buildConfigField 'String', 'DIAGNOSTICS_ENDPOINT', '"https://ignmxvommfnkllcpliuw.supabase.co/functions/v1/linkpas-diagnostics"'
         buildConfigField 'String', 'DIAGNOSTICS_PUBLISHABLE_KEY', '"sb_publishable_CzSU2cNRiNUY7qZzCv77QQ_jGEdaBQ3"'
     }
