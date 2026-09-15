@@ -8,6 +8,7 @@ function loadDiagnostics({ fetchImpl }) {
   const listeners = new Map();
   const context = {
     console,
+    Error,
     URLSearchParams,
     setTimeout,
     clearTimeout,
