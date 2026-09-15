@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-function loadDiagnostics({ fetchImpl }) {
+function loadDiagnostics({ fetchImpl, probeId = null }) {
   const listeners = new Map();
   const context = {
     console,
@@ -35,6 +35,7 @@ function loadDiagnostics({ fetchImpl }) {
         appVersion: '0.1.0-beta',
         buildVersion: '1',
       },
+      LinkPasLaunchProbe: { currentProbeId: probeId },
       addEventListener(type, handler) {
         listeners.set(type, handler);
       },
@@ -68,4 +69,22 @@ test('breadcrumbs keep only the newest 20 technical events', () => {
   assert.equal(rows[0].event, 'event_5');
   assert.equal(rows.at(-1).event, 'event_24');
   assert.ok(rows.every((row) => Object.keys(row).sort().join(',') === 'at,event,state'));
+});
+
+test('correlated launch probe emits automatically without manual diagnostics action', async () => {
+  const probeId = '123e4567-e89b-42d3-a456-426614174000';
+  const payloads = [];
+  loadDiagnostics({
+    probeId,
+    fetchImpl: async (_url, init) => {
+      payloads.push(JSON.parse(init.body));
+      return { ok: true, status: 201, json: async () => ({ report_id: 'probe-report' }) };
+    },
+  });
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(payloads.length, 1);
+  assert.equal(payloads[0].error_type, 'pwa_launch_probe');
+  assert.equal(payloads[0].diagnostics.probe_id, probeId);
+  assert.equal(payloads[0].diagnostics.app_stage, 'pwa_launch_probe');
+  assert.equal(payloads[0].service_worker_state, 'available_not_controlling');
 });

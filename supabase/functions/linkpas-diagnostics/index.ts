@@ -6,10 +6,16 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 const MAX_BODY_BYTES = 32768;
 const ALLOWED_SOURCES = new Set(['pwa', 'android', 'manual', 'test']);
+const PROBE_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DIAGNOSTIC_KEYS = new Set([
   'app_stage', 'twa_status', 'sw_scope', 'browser_provider', 'request_kind',
   'http_status', 'function_name', 'file', 'line', 'column', 'release_channel',
-  'network_state', 'launch_url_host', 'launch_url_path'
+  'network_state', 'launch_url_host', 'launch_url_path', 'probe_id', 'probe_source',
+  'android_sdk', 'signer_state', 'signer_match', 'app_links_state',
+  'link_handling_allowed', 'twa_capability_state', 'twa_capable_provider',
+  'self_check_state', 'twa_launch_requested', 'dal_relation',
+  'dal_relationship_state', 'dal_relationship_detail', 'fallback_invoked',
+  'fallback_state', 'fallback_kind', 'target_host', 'verdict', 'verdict_reason'
 ]);
 
 function corsHeaders(origin: string | null) {
@@ -35,6 +41,12 @@ function redact(value: unknown, max = 1000): string | null {
   out = out.replace(/https?:\/\/[^\s)\]}>'\"]+/gi, '[url]');
   out = out.replace(/\b[A-Za-z0-9_-]{24,}\b/g, '[token]');
   return out;
+}
+
+function cleanProbeId(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const candidate = value.trim();
+  return candidate.length === 36 && PROBE_ID_RE.test(candidate) ? candidate.toLowerCase() : null;
 }
 
 function pagePath(value: unknown): string | null {
@@ -66,6 +78,11 @@ function cleanDiagnostics(value: unknown) {
   const out: Record<string, string | number | boolean | null> = {};
   for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
     if (!DIAGNOSTIC_KEYS.has(key)) continue;
+    if (key === 'probe_id') {
+      const probeId = cleanProbeId(raw);
+      if (probeId) out[key] = probeId;
+      continue;
+    }
     if (typeof raw === 'number' || typeof raw === 'boolean' || raw === null) out[key] = raw;
     else if (typeof raw === 'string') out[key] = redact(raw, 300);
   }

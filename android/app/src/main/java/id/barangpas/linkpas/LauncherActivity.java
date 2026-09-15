@@ -1,5 +1,6 @@
 package id.barangpas.linkpas;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,6 +18,7 @@ public class LauncherActivity
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private boolean controlledDiagnosticTest;
     private String selectedBrowserProvider = "unresolved";
+    private String launchProbeId;
 
     @Override
     protected boolean shouldLaunchImmediately() {
@@ -26,6 +28,8 @@ public class LauncherActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         controlledDiagnosticTest = NativeDiagnostics.isControlledTest(getIntent());
+        launchProbeId = BuildConfig.VERSION_NAME.contains("-beta") ? LaunchProbeId.create() : null;
+        LaunchProbeId.setCurrent(launchProbeId);
         NativeDiagnostics.install(this, getIntent());
         NativeDiagnostics.markStage(this, "launcher_on_create");
         super.onCreate(savedInstanceState);
@@ -40,6 +44,20 @@ public class LauncherActivity
         } else {
             NativeDiagnostics.markStage(this, "twa_launch_requested");
         }
+    }
+
+    @Override
+    protected Uri getLaunchingUrl() {
+        Uri launchUrl = super.getLaunchingUrl();
+        if (!LaunchProbeId.isValid(launchProbeId)
+                || launchUrl == null
+                || !"https".equalsIgnoreCase(launchUrl.getScheme())
+                || !NativeSelfCheck.HOST.equalsIgnoreCase(launchUrl.getHost())) {
+            return launchUrl;
+        }
+        return launchUrl.buildUpon()
+                .appendQueryParameter(LaunchProbeId.QUERY_PARAM, launchProbeId)
+                .build();
     }
 
     @Override

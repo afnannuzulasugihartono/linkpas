@@ -2,6 +2,7 @@
   const cfg = window.LINKPAS_CONFIG || {};
   const endpoint = cfg.diagnosticsEndpoint || '';
   const apiKey = cfg.diagnosticsPublishableKey || '';
+  const launchProbeId = window.LinkPasLaunchProbe?.currentProbeId || null;
   const MAX_BREADCRUMBS = 20;
   const breadcrumbs = [];
   let lastReportId = null;
@@ -53,6 +54,7 @@
         release_channel: 'beta',
         network_state: navigator.onLine ? 'online' : 'offline',
         sw_scope: navigator.serviceWorker?.controller?.scriptURL || null,
+        ...(launchProbeId ? { probe_id: launchProbeId } : {}),
       },
     };
   }
@@ -170,6 +172,20 @@
     getLastSendOutcome: () => ({ ...lastSendOutcome }),
     getServiceWorkerState: serviceWorkerState,
   };
+
+  if (launchProbeId) {
+    breadcrumb('launch_probe_received', 'android_beta');
+    setTimeout(() => {
+      void sendReport({
+        errorType: 'pwa_launch_probe',
+        errorMessage: 'Automatic Beta PWA launch probe',
+        diagnostics: {
+          app_stage: 'pwa_launch_probe',
+          probe_source: 'android_twa_launch',
+        },
+      });
+    }, 0);
+  }
 
   // Beta-only deterministic validation hook. It runs only when explicitly requested by query string.
   const testType = new URLSearchParams(location.search).get('__linkpas_diag_test');

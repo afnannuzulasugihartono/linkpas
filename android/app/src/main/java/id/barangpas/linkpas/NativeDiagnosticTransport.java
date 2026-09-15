@@ -1,5 +1,7 @@
 package id.barangpas.linkpas;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,7 +35,8 @@ final class NativeDiagnosticTransport {
             connection.setRequestProperty("apikey", apiKey);
             connection.setRequestProperty("Cache-Control", "no-store");
 
-            byte[] bytes = payload.getBytes(StandardCharsets.UTF_8);
+            String correlatedPayload = withCurrentLaunchProbe(payload);
+            byte[] bytes = correlatedPayload.getBytes(StandardCharsets.UTF_8);
             connection.setFixedLengthStreamingMode(bytes.length);
             try (OutputStream output = connection.getOutputStream()) {
                 output.write(bytes);
@@ -63,6 +66,28 @@ final class NativeDiagnosticTransport {
 
     static String getLastFailureCode() {
         return lastFailureCode;
+    }
+
+    private static String withCurrentLaunchProbe(String payload) {
+        String probeId = LaunchProbeId.current();
+        if (!LaunchProbeId.isValid(probeId) || payload == null || payload.isEmpty()) return payload;
+        try {
+            JSONObject root = new JSONObject(payload);
+            String errorType = root.optString("error_type", "");
+            if (!"native_self_check".equals(errorType)
+                    && !"native_twa_evidence".equals(errorType)) {
+                return payload;
+            }
+            JSONObject diagnostics = root.optJSONObject("diagnostics");
+            if (diagnostics == null) {
+                diagnostics = new JSONObject();
+                root.put("diagnostics", diagnostics);
+            }
+            diagnostics.put("probe_id", probeId);
+            return root.toString();
+        } catch (Exception ignored) {
+            return payload;
+        }
     }
 
     private static String readAll(InputStream input) throws Exception {
