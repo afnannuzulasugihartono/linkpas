@@ -47,3 +47,25 @@ A controlled sanitized report was submitted through the deployed Edge Function a
 A direct REST read using the public publishable key returned HTTP `401` / PostgreSQL `42501 permission denied`, confirming that public clients cannot read the diagnostic table directly.
 
 Temporary `pg_net` used only to validate the HTTP path was removed after the test.
+
+## Android native diagnostics (D4a)
+
+The Android TWA wrapper adds a Beta-only native diagnostics layer for failures that happen before or outside the PWA runtime.
+
+Native reports are intentionally limited to technical metadata:
+
+- app version/code and package name;
+- Android SDK level;
+- sanitized launch host/path only (query and fragment are not stored);
+- resolved default browser-provider package when available;
+- startup stage;
+- uncaught native exception message/stack after local redaction;
+- a single bounded native-stage breadcrumb.
+
+The wrapper installs a best-effort uncaught-exception handler. A pending crash report is stored in app-private `SharedPreferences` and retried asynchronously on the next startup. Diagnostic upload uses the public Supabase publishable key and never includes a service-role credential.
+
+A controlled Beta test hook is available through the boolean Android intent extra `linkpas_native_diag_test=true`. It emits `native_controlled_test` with `source=android` and does not depend on clipboard, affiliate links, license values, account data, or device identifiers.
+
+Native reporting is deliberately non-blocking: transport exceptions/timeouts are caught and return `null`, and startup continues independently of telemetry success. Unit tests cover transport failure and sanitizer behavior.
+
+Runtime Android emission and Supabase readback are validated separately in D4b. TWA verification success, App Links verification state, browser fallback behavior, and some Chrome/TWA internals cannot be reliably proven from this wrapper telemetry alone and remain candidates for ADB/logcat diagnostics.
