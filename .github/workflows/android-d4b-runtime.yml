@@ -6,7 +6,9 @@ on:
     paths:
       - '.github/workflows/android-d4b-runtime.yml'
       - '.github/scripts/d4b-runtime.sh'
-      - '.github/scripts/d4b-dns-proxy.py'
+      - '.github/scripts/d4b-http-relay.py'
+      - 'android/app/build.gradle'
+      - 'android/app/src/debug/AndroidManifest.xml'
       - 'android/app/src/main/java/id/barangpas/linkpas/NativeDiagnostics.java'
       - 'android/app/src/main/java/id/barangpas/linkpas/NativeDiagnosticTransport.java'
 
@@ -33,9 +35,9 @@ jobs:
         with:
           gradle-version: '8.11.1'
 
-      - name: Build debug APK
+      - name: Build D4b debug APK with localhost relay endpoint
         working-directory: android
-        run: gradle --no-daemon :app:assembleDebug
+        run: gradle --no-daemon :app:assembleDebug -PlinkpasDiagnosticsEndpoint=http://127.0.0.1:8765/
 
       - name: Enable KVM
         run: |
@@ -43,22 +45,17 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Bridge runner DNS to emulator
-        id: dns_bridge
+      - name: Start validation-only Supabase relay
         shell: bash
         run: |
-          UPSTREAM="$(awk '/^nameserver[[:space:]]+/{print $2; exit}' /etc/resolv.conf)"
-          HOST_IP="$(ip route get 1.1.1.1 | awk '{for (i=1; i<=NF; i++) if ($i == "src") {print $(i+1); exit}}')"
-          if [[ -z "$UPSTREAM" || -z "$HOST_IP" ]]; then
-            echo 'Could not resolve runner DNS bridge addresses.' >&2
-            exit 1
-          fi
-          echo "D4B_DNS_UPSTREAM=$UPSTREAM"
-          echo "D4B_DNS_BRIDGE_IP=$HOST_IP"
-          echo "server=$HOST_IP" >> "$GITHUB_OUTPUT"
-          sudo sh -c "nohup python3 '$GITHUB_WORKSPACE/.github/scripts/d4b-dns-proxy.py' '$HOST_IP' '$UPSTREAM' >/tmp/d4b-dns-proxy.log 2>&1 &"
+          nohup python3 .github/scripts/d4b-http-relay.py >/tmp/d4b-http-relay.log 2>&1 &
           sleep 1
-          sudo ss -lunp | grep -q "$HOST_IP:53"
+          python3 - <<'PY'
+          import socket
+          s = socket.create_connection(('127.0.0.1', 8765), timeout=2)
+          s.close()
+          print('D4B_HTTP_RELAY=ready')
+          PY
 
       - name: Run controlled native diagnostic on Android emulator
         id: runtime
@@ -69,7 +66,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -dns-server ${{ steps.dns_bridge.outputs.server }}
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: bash .github/scripts/d4b-runtime.sh
 
       - name: Upload D4b report ID evidence
