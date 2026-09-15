@@ -1,12 +1,12 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "READY",
+  "status": "BLOCKED",
   "current_checkpoint": "A6a2c",
   "last_completed_checkpoint": "A6a2b",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b"],
-  "next_action": "Execute A6a2c only according to docs/A6A_SUBCHECKPOINTS.md: add the Beta-only automatic native-to-PWA launch probe handshake, remove the probe from visible browser history/state on the PWA side, correlate native and PWA evidence in Supabase, and implement deterministic PASS_VERIFIED_TWA / FAIL_FALLBACK / FAIL_DAL / INCONCLUSIVE / NEEDS_ADB verdict rules. Do not start A6a2d in the same turn.",
-  "blocker": null,
+  "next_action": "Resume A6a2c at the CI gate only: verify Web Tests, Android Debug APK, and Android Release APK for PR #11 head 09e6114e7f145dca4b1dcca001e2935847819ffe. If all required checks are successful, merge PR #11, record A6a2c evidence, advance current_checkpoint to A6a2d, and stop without executing A6a2d.",
+  "blocker": "Required A6a2c CI is still running: Android Debug APK run 34943098305 and Android Release APK run 34943098218 are in_progress. Web Tests run 34943098287 is already successful. Do not merge or advance until both Android runs complete successfully.",
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit in one 18-minute checkpoint.",
     "a6_subcheckpoints": ["A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b", "A6c"],
