@@ -5,8 +5,8 @@
   "current_checkpoint": "A6a2e",
   "last_completed_checkpoint": "A6a2d",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d"],
-  "next_action": "Resume A6a2e only. Relaunch the already-installed A6a2d RC once more through the normal app icon after the current production PWA/service-worker deployment is active, then inspect Supabase again for correlated native_self_check, native_twa_evidence, and pwa_launch_probe reports sharing one probe_id. If automatic evidence remains absent after the retry, classify automatic evidence as exhausted and evaluate NEEDS_ADB according to the deterministic verdict rules. Do not start A6b.",
-  "blocker": "A6a2e automatic evidence is INCONCLUSIVE after the first real-device launch. The exact distributed APK matches the A6a2d RC SHA-256, and production Vercel serves the A6a2c launch-probe/automatic diagnostics code, but Supabase received no new native_self_check or native_twa_evidence and no pwa_launch_probe/probe_id for the launch. The only contemporaneous row is a PWA manual_diagnostic report. Absence of evidence is not treated as FAIL or PASS, and automatic evidence is not yet marked exhausted.",
+  "next_action": "Resume A6a2e only using the existing D5 Windows ADB fallback because the automatic no-ADB evidence path has now been exhausted by two real-device launches. Run LINKPAS-Debug.bat with exactly one authorized Android device connected, inspect the bounded package/App Links/TWA/logcat bundle, combine it with existing Supabase evidence, and evaluate the deterministic A6a2 verdict. Do not start A6b unless PASS_VERIFIED_TWA is proven.",
+  "blocker": "A6a2e automatic evidence is exhausted and the deterministic verdict is NEEDS_ADB. Two normal real-device launches of the exact A6a2d RC produced no native_self_check, native_twa_evidence, or pwa_launch_probe/probe_id rows in Supabase. The production PWA has the A6a2c launch-probe and automatic diagnostics code, and the distributed APK matches the verified A6a2d SHA-256. Only contemporaneous PWA manual_diagnostic rows were observed, so no PASS/FAIL claim is made without the bounded ADB fallback evidence.",
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit inside one 18-minute checkpoint.",
     "a6_subcheckpoints": ["A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b", "A6c"],
@@ -70,14 +70,14 @@
     "remaining_blocker": null
   },
   "a6a2e_attempt_evidence": {
-    "verdict": "INCONCLUSIVE",
+    "verdict": "NEEDS_ADB",
     "reason": "automatic_evidence_incomplete",
     "distributed_apk_sha256": "8779752cddb6fe4af0a4ff9ed52e2001d009e699a88435f426ec2d22462c1fe5",
     "distributed_apk_matches_a6a2d": true,
     "production_deployment_commit": "30ffd8fc8eb8289133ffbab70b6161d3e2f5a066",
     "production_launch_probe_present": true,
     "production_automatic_pwa_probe_present": true,
-    "launch_window_start_utc": "2026-09-15T08:25:30Z",
+    "attempts": 2,
     "contemporaneous_reports": [
       {
         "report_id": "bc25102a-b663-4b72-90ca-c7603371bf71",
@@ -86,12 +86,21 @@
         "created_at": "2026-09-15T08:25:57.443235Z",
         "service_worker_state": "controlled",
         "probe_id_present": false
+      },
+      {
+        "report_id": "b528909a-596a-4ced-8f25-054a32e1e8ba",
+        "source": "pwa",
+        "error_type": "manual_diagnostic",
+        "created_at": "2026-09-15T09:03:12.277152Z",
+        "service_worker_state": "controlled",
+        "probe_id_present": false
       }
     ],
     "native_self_check_observed": false,
     "native_twa_evidence_observed": false,
     "pwa_launch_probe_observed": false,
-    "automatic_evidence_exhausted": false
+    "automatic_evidence_exhausted": true,
+    "fallback_required": "LINKPAS-Debug.bat bounded ADB collection"
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
