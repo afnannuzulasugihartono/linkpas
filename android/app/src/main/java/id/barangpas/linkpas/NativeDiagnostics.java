@@ -24,6 +24,7 @@ final class NativeDiagnostics {
     private static final String KEY_STAGE = "last_stage";
     private static final String KEY_LAST_REPORT = "last_report_id";
     private static final String KEY_LAST_TRANSPORT_ERROR = "last_transport_error";
+    private static final String KEY_TEST_LIFECYCLE = "d4b_test_lifecycle";
     private static final AtomicBoolean HANDLER_INSTALLED = new AtomicBoolean(false);
 
     private NativeDiagnostics() {}
@@ -36,8 +37,9 @@ final class NativeDiagnostics {
         if (BuildConfig.VERSION_NAME.contains("-beta")
                 && launchIntent != null
                 && launchIntent.getBooleanExtra("linkpas_native_diag_test", false)) {
+            markControlledTestLifecycle(app, "send_enqueued");
             emitAsync(app, buildPayload(app, launchIntent, "native_controlled_test",
-                    "Controlled Android diagnostics event", null, "controlled_test"));
+                    "Controlled Android diagnostics event", null, "controlled_test"), true);
         }
     }
 
@@ -47,6 +49,17 @@ final class NativeDiagnostics {
                     .edit().putString(KEY_STAGE, NativeDiagnosticSanitizer.redact(stage, 80)).apply();
         } catch (Exception ignored) {
             // Diagnostics must never block startup.
+        }
+    }
+
+    private static void markControlledTestLifecycle(Context context, String marker) {
+        try {
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                    .edit()
+                    .putString(KEY_TEST_LIFECYCLE, NativeDiagnosticSanitizer.redact(marker, 80))
+                    .commit();
+        } catch (Exception ignored) {
+            // Validation-only marker must never affect app flow.
         }
     }
 
@@ -98,12 +111,14 @@ final class NativeDiagnostics {
         }, "linkpas-diag-flush").start();
     }
 
-    private static void emitAsync(Context context, String payload) {
+    private static void emitAsync(Context context, String payload, boolean controlledTest) {
         new Thread(() -> {
+            if (controlledTest) markControlledTestLifecycle(context, "send_thread_started");
             String reportId = NativeDiagnosticTransport.post(
                     BuildConfig.DIAGNOSTICS_ENDPOINT,
                     BuildConfig.DIAGNOSTICS_PUBLISHABLE_KEY,
                     payload);
+            if (controlledTest) markControlledTestLifecycle(context, "transport_returned");
             try {
                 SharedPreferences.Editor editor = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
                 if (reportId != null) {
