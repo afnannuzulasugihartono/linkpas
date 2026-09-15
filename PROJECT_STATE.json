@@ -1,12 +1,12 @@
 {
   "project": "LINKPAS",
   "milestone": "APK_BETA",
-  "status": "BLOCKED",
+  "status": "READY",
   "current_checkpoint": "A6a2e",
   "last_completed_checkpoint": "A6a2d",
   "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d"],
-  "next_action": "Resume A6a2e only using the existing D5 Windows ADB fallback because the automatic no-ADB evidence path has now been exhausted by two real-device launches. Run LINKPAS-Debug.bat with exactly one authorized Android device connected, inspect the bounded package/App Links/TWA/logcat bundle, combine it with existing Supabase evidence, and evaluate the deterministic A6a2 verdict. Do not start A6b unless PASS_VERIFIED_TWA is proven.",
-  "blocker": "A6a2e automatic evidence is exhausted and the deterministic verdict is NEEDS_ADB. Two normal real-device launches of the exact A6a2d RC produced no native_self_check, native_twa_evidence, or pwa_launch_probe/probe_id rows in Supabase. The production PWA has the A6a2c launch-probe and automatic diagnostics code, and the distributed APK matches the verified A6a2d SHA-256. Only contemporaneous PWA manual_diagnostic rows were observed, so no PASS/FAIL claim is made without the bounded ADB fallback evidence.",
+  "next_action": "Resume A6a2e only using the signed automatic-diagnostics recovery RC from PR #12. Install/update LINKPAS-v0.1.0-beta-rc.apk with SHA-256 2c6ff583ae5a7258b3568ac163e1ff373953a8a530d83a9a16d1b3fa37e0ca66, open LINKPAS normally once, then inspect Supabase for either correlated native_self_check/native_twa_evidence/pwa_launch_probe reports sharing one probe_id or the automatic pwa_startup_no_probe beacon. Do not require ADB unless this repaired automatic path is again exhausted. Do not start A6b unless PASS_VERIFIED_TWA is proven.",
+  "blocker": null,
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit inside one 18-minute checkpoint.",
     "a6_subcheckpoints": ["A6a1", "A6a2a", "A6a2b", "A6a2c", "A6a2d", "A6a2e", "A6b", "A6c"],
@@ -100,7 +100,43 @@
     "native_twa_evidence_observed": false,
     "pwa_launch_probe_observed": false,
     "automatic_evidence_exhausted": true,
-    "fallback_required": "LINKPAS-Debug.bat bounded ADB collection"
+    "fallback_required": "LINKPAS-Debug.bat bounded ADB collection",
+    "superseded_by_automatic_recovery": true
+  },
+  "automatic_recovery": {
+    "requested_by_user": true,
+    "product_pr": 12,
+    "product_merge_sha": "67e75a9a8569a5c2525c9071121e7208f1661efa",
+    "validation_head_sha": "9d90c6d4ce91dc69763905d5d4dcc04f17abcd7a",
+    "ci": {
+      "web_run_id": 34951630858,
+      "web_tests": "success",
+      "debug_run_id": 34951630880,
+      "debug_build": "success",
+      "release_run_id": 34951630905,
+      "android_unit_tests": "success",
+      "unsigned_release_build": "success",
+      "unsigned_artifact_id": 10389781472
+    },
+    "reliability_changes": {
+      "native": "Automatic native self-check/TWA evidence is persisted before transport in a bounded local outbox, retried with bounded delays, retained for the next launch after transport failure, and preserves its original probe ID across later launches.",
+      "pwa": "Diagnostic uploads are serialized rather than dropped while another upload is in flight; automatic launch/startup reports retry; pwa_startup_no_probe distinguishes a live PWA from a missing native handshake.",
+      "service_worker": "Cache generation bumped from linkpas-pwa-v5 to linkpas-pwa-v6 so the repaired diagnostics bundle replaces stale cached diagnostics code.",
+      "privacy": "No affiliate-link content, clipboard content, buyer email, license value, credentials, signing material, screenshots, file contents, or device identifier was added to diagnostics."
+    },
+    "signed_recovery_rc": {
+      "filename": "LINKPAS-v0.1.0-beta-rc.apk",
+      "sha256": "2c6ff583ae5a7258b3568ac163e1ff373953a8a530d83a9a16d1b3fa37e0ca66",
+      "size_bytes": 3814288,
+      "package": "id.barangpas.linkpas",
+      "version_name": "0.1.0-beta",
+      "version_code": 1,
+      "certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6",
+      "signature_v1": "pass",
+      "signature_v2": "pass",
+      "signature_v3": "pass"
+    },
+    "retry_status": "ready_for_real_device_retry"
   },
   "continuation_semantics": {
     "trigger": "lanjutkan",
