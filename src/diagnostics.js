@@ -5,10 +5,19 @@
   const launchProbeId = window.LinkPasLaunchProbe?.currentProbeId || null;
   const MAX_BREADCRUMBS = 20;
   const breadcrumbs = [];
+  const configuredRetryDelays = Array.isArray(cfg.diagnosticsAutoRetryDelays)
+    ? cfg.diagnosticsAutoRetryDelays
+    : [0, 800, 3000];
+  const AUTO_RETRY_DELAYS = configuredRetryDelays
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value) && value >= 0 && value <= 10000)
+    .slice(0, 4);
+  if (AUTO_RETRY_DELAYS.length === 0) AUTO_RETRY_DELAYS.push(0);
+
   let lastReportId = null;
   let lastDiagnosticError = null;
   let lastSendOutcome = { ok: null, status: null, error: null };
-  let sending = false;
+  let sendChain = Promise.resolve();
 
   function safeText(value, max = 800) {
     if (value == null) return null;
@@ -59,17 +68,17 @@
     };
   }
 
-  async function sendReport(details = {}) {
-    if (!endpoint || !apiKey || sending) return null;
-    sending = true;
+  async function performSend(details = {}) {
+    if (!endpoint || !apiKey) return null;
     try {
+      const base = basePayload();
       const payload = {
-        ...basePayload(),
+        ...base,
         error_type: safeText(details.errorType, 100),
         error_message: safeText(details.errorMessage, 1000),
         error_stack: safeText(details.errorStack, 6000),
         diagnostics: {
-          ...basePayload().diagnostics,
+          ...base.diagnostics,
           ...(details.diagnostics || {}),
         },
       };
@@ -95,9 +104,26 @@
     } catch (error) {
       lastSendOutcome = { ok: false, status: null, error: error instanceof Error ? error.message : 'fetch_failed' };
       return null;
-    } finally {
-      sending = false;
     }
+  }
+
+  function sendReport(details = {}) {
+    // Serialize uploads instead of dropping a report merely because another report is in flight.
+    const task = sendChain.then(
+      () => performSend(details),
+      () => performSend(details),
+    );
+    sendChain = task.then(() => null, () => null);
+    return task;
+  }
+
+  async function sendAutomaticReport(details = {}) {
+    for (const delay of AUTO_RETRY_DELAYS) {
+      if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
+      const reportId = await sendReport(details);
+      if (reportId) return reportId;
+    }
+    return null;
   }
 
   async function trackedFetch(input, init = {}, requestKind = 'important_fetch') {
@@ -165,6 +191,7 @@
     breadcrumb,
     noteError,
     report: sendReport,
+    reportAutomatic: sendAutomaticReport,
     fetch: trackedFetch,
     getBreadcrumbs: () => breadcrumbs.slice(),
     getLastError: () => lastDiagnosticError,
@@ -176,12 +203,26 @@
   if (launchProbeId) {
     breadcrumb('launch_probe_received', 'android_beta');
     setTimeout(() => {
-      void sendReport({
+      void sendAutomaticReport({
         errorType: 'pwa_launch_probe',
         errorMessage: 'Automatic Beta PWA launch probe',
         diagnostics: {
           app_stage: 'pwa_launch_probe',
           probe_source: 'android_twa_launch',
+        },
+      });
+    }, 0);
+  } else {
+    // This beacon is intentionally probe-free. It lets remote diagnostics distinguish
+    // "PWA loaded but native handshake is absent" from "PWA did not load at all".
+    breadcrumb('launch_probe_missing', 'automatic_startup');
+    setTimeout(() => {
+      void sendAutomaticReport({
+        errorType: 'pwa_startup_no_probe',
+        errorMessage: 'Automatic Beta PWA startup without Android launch probe',
+        diagnostics: {
+          app_stage: 'pwa_startup_no_probe',
+          probe_source: 'missing_or_non_native_launch',
         },
       });
     }, 0);

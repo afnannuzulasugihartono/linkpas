@@ -28,8 +28,9 @@ final class NativeDiagnosticTransport {
             }
             connection = (HttpURLConnection) new URL(endpoint).openConnection();
             connection.setRequestMethod("POST");
-            connection.setConnectTimeout(1200);
-            connection.setReadTimeout(1800);
+            // Diagnostics run off the UI thread. A slightly wider window is more reliable on cold mobile startup.
+            connection.setConnectTimeout(3000);
+            connection.setReadTimeout(5000);
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
             connection.setRequestProperty("apikey", apiKey);
@@ -57,7 +58,9 @@ final class NativeDiagnosticTransport {
             return matcher.group(1);
         } catch (Exception error) {
             String name = error.getClass().getSimpleName();
-            lastFailureCode = (name == null || name.isEmpty()) ? "transport_exception" : name.substring(0, Math.min(name.length(), 80));
+            lastFailureCode = (name == null || name.isEmpty())
+                    ? "transport_exception"
+                    : name.substring(0, Math.min(name.length(), 80));
             return null;
         } finally {
             if (connection != null) connection.disconnect();
@@ -68,9 +71,9 @@ final class NativeDiagnosticTransport {
         return lastFailureCode;
     }
 
-    private static String withCurrentLaunchProbe(String payload) {
-        String probeId = LaunchProbeId.current();
-        if (!LaunchProbeId.isValid(probeId) || payload == null || payload.isEmpty()) return payload;
+    static String withCurrentLaunchProbe(String payload) {
+        String currentProbe = LaunchProbeId.current();
+        if (payload == null || payload.isEmpty()) return payload;
         try {
             JSONObject root = new JSONObject(payload);
             String errorType = root.optString("error_type", "");
@@ -83,7 +86,11 @@ final class NativeDiagnosticTransport {
                 diagnostics = new JSONObject();
                 root.put("diagnostics", diagnostics);
             }
-            diagnostics.put("probe_id", probeId);
+            String existingProbe = diagnostics.optString("probe_id", "");
+            String selectedProbe = LaunchProbeId.preferExisting(existingProbe, currentProbe);
+            if (selectedProbe != null && !selectedProbe.equals(existingProbe)) {
+                diagnostics.put("probe_id", selectedProbe);
+            }
             return root.toString();
         } catch (Exception ignored) {
             return payload;
