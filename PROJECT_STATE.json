@@ -2,10 +2,10 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "A6a2a",
-  "last_completed_checkpoint": "A6a1",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1"],
-  "next_action": "Execute A6a2a only according to docs/A6A_SUBCHECKPOINTS.md: implement Beta-only native self-check primitives for installed signer fingerprint match, Android 12+ App Links verification state, browser provider/TWA capability, sanitized diagnostics emission, and bounded tests. Do not start A6a2b in the same turn.",
+  "current_checkpoint": "A6a2b",
+  "last_completed_checkpoint": "A6a2a",
+  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a"],
+  "next_action": "Execute A6a2b only according to docs/A6A_SUBCHECKPOINTS.md: bind to the chosen TWA-capable browser, perform browser Digital Asset Links relationship validation for https://linkpas.vercel.app, preserve true/false/timeout as distinct evidence, and instrument actual Custom Tab fallback so fallback_invoked is observable without routine ADB. Do not start A6a2c in the same turn.",
   "blocker": null,
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit in one 18-minute checkpoint.",
@@ -24,37 +24,31 @@
     "privacy_rule": "Use synthetic/non-sensitive test data only; probe IDs must be random technical IDs with no user data; keep signing key/password outside Git and logs; diagnostics collect technical metadata only."
   },
   "last_checkpoint_evidence": {
-    "checkpoint": "A6a1",
+    "checkpoint": "A6a2a",
     "result": "PASS",
-    "validation_branch": "chore/a6a1-release-rebuild",
-    "validation_commit": "fb91371b397450d1d2fcab287d508e92ce068e3d",
-    "main_base_commit": "6736e32e6843e52553d43e2e38f59d9490d3f36f",
-    "source_equivalence": "GitHub compare confirms the validation commit differs from main_base_commit only by .github/workflows/a6a1-release-rebuild.yml; Android source is identical.",
-    "ci_run_id": 34936914129,
-    "android_unit_tests": "success",
-    "unsigned_release_build": "success",
-    "signed_artifact": "LINKPAS-v0.1.0-beta-rc.apk",
-    "artifact_size_bytes": 3802000,
-    "apk_sha256": "3f86941bf39d57c1fb22989ac31ed7d567986fa9af5c5432d831031e0c38aedc",
-    "package_name": "id.barangpas.linkpas",
-    "version_name": "0.1.0-beta",
-    "version_code": 1,
-    "signers": 1,
-    "signature_schemes": {
-      "v1": true,
-      "v2": true,
-      "v3": true
+    "product_pr": 9,
+    "product_merge_sha": "58ce798e5f57360c1eec538afa59b0ff4ce13548",
+    "validation_head_sha": "30dc120d4bf9fc110474daeb4f948718e77eb829",
+    "ci": {
+      "debug_run_id": 34939626596,
+      "debug_build": "success",
+      "release_run_id": 34939626551,
+      "android_unit_tests": "success",
+      "unsigned_release_build": "success"
     },
-    "signing_certificate_sha256": "61:A0:47:4A:18:10:42:11:6C:15:25:AC:A2:E9:E6:A9:29:F8:9D:12:D1:3E:D2:9C:A0:BF:43:3E:00:6B:90:A6",
-    "binary_checks": {
-      "LauncherActivity": true,
-      "NativeDiagnostics": true,
-      "NativeDiagnosticTransport": true,
-      "NativeDiagnosticSanitizer": true,
-      "ManageDataLauncherActivity": true,
-      "linkpas_vercel_app_host": true
+    "self_check_primitives": {
+      "signer": "Reads installed APK signing certificate SHA-256 and reports only match/mismatch/unavailable state against the published LINKPAS release fingerprint.",
+      "app_links": "Android 12+ DomainVerificationManager maps linkpas.vercel.app to verified, user_selected, none, missing_host, or unknown_state; Android <12 is explicitly unsupported_api.",
+      "browser_twa_capability": "Discovers the default browser and TWA-capable Custom Tabs providers using the TrustedWebActivities service category, with query_failed/not_advertised/available_provider_only/default_provider_supported states.",
+      "diagnostics": "Beta launch emits native_self_check asynchronously through the existing sanitized diagnostics transport without delaying the normal TWA launch path.",
+      "privacy": "No raw certificate, clipboard, affiliate-link content, license value, credential, or device identifier is emitted; only technical package/browser/domain state is reported."
     },
-    "signing_material": "Existing A4 signing identity reused outside Git. Keystore/password were not committed or included in the verification report.",
+    "tests": {
+      "app_links_unsupported_below_api31": "pass",
+      "app_links_state_mapping": "pass",
+      "twa_capability_tristate_mapping": "pass",
+      "fingerprint_normalization_and_match": "pass"
+    },
     "remaining_blocker": null
   },
   "continuation_semantics": {
