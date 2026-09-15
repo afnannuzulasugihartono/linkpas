@@ -13,16 +13,27 @@ printf '%s\n' "$TRIGGER_OUTPUT"
 echo "$TRIGGER_OUTPUT" | grep -q 'Status: ok'
 
 REPORT_ID=''
+TRANSPORT_ERROR=''
 for i in $(seq 1 30); do
   PREFS="$(adb shell run-as "$PACKAGE" cat shared_prefs/linkpas_native_diagnostics.xml 2>/dev/null || true)"
   REPORT_ID="$(printf '%s\n' "$PREFS" | sed -n 's/.*name="last_report_id">\([^<]*\)<.*/\1/p' | head -n 1)"
-  if [ -n "$REPORT_ID" ]; then
+  TRANSPORT_ERROR="$(printf '%s\n' "$PREFS" | sed -n 's/.*name="last_transport_error">\([^<]*\)<.*/\1/p' | head -n 1)"
+  if [ -n "$REPORT_ID" ] || [ -n "$TRANSPORT_ERROR" ]; then
     break
   fi
   sleep 1
 done
 
-test -n "$REPORT_ID"
+if [ -n "$TRANSPORT_ERROR" ] && [ -z "$REPORT_ID" ]; then
+  printf 'D4B_TRANSPORT_ERROR=%s\n' "$TRANSPORT_ERROR" >&2
+  exit 1
+fi
+
+if [ -z "$REPORT_ID" ]; then
+  echo 'D4B_TRANSPORT_ERROR=no_result_after_30s' >&2
+  exit 1
+fi
+
 printf '%s\n' "$REPORT_ID" | tee d4b-report-id.txt
 
 adb shell am force-stop "$PACKAGE"
