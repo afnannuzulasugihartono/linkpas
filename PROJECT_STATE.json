@@ -2,10 +2,10 @@
   "project": "LINKPAS",
   "milestone": "APK_BETA",
   "status": "READY",
-  "current_checkpoint": "A6a2b",
-  "last_completed_checkpoint": "A6a2a",
-  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a"],
-  "next_action": "Execute A6a2b only according to docs/A6A_SUBCHECKPOINTS.md: bind to the chosen TWA-capable browser, perform browser Digital Asset Links relationship validation for https://linkpas.vercel.app, preserve true/false/timeout as distinct evidence, and instrument actual Custom Tab fallback so fallback_invoked is observable without routine ADB. Do not start A6a2c in the same turn.",
+  "current_checkpoint": "A6a2c",
+  "last_completed_checkpoint": "A6a2b",
+  "completed_checkpoints": ["A1", "A2", "A3", "A4", "A5", "D1", "D2", "D3", "D4a", "D4b", "D5", "A6a1", "A6a2a", "A6a2b"],
+  "next_action": "Execute A6a2c only according to docs/A6A_SUBCHECKPOINTS.md: add the Beta-only automatic native-to-PWA launch probe handshake, remove the probe from visible browser history/state on the PWA side, correlate native and PWA evidence in Supabase, and implement deterministic PASS_VERIFIED_TWA / FAIL_FALLBACK / FAIL_DAL / INCONCLUSIVE / NEEDS_ADB verdict rules. Do not start A6a2d in the same turn.",
   "blocker": null,
   "roadmap_revision": {
     "reason": "A6 was split before execution; A6a was split because the signed A5 APK predates D4a/D4b; A6a2 is split again because fully automatic no-routine-ADB verification spans native self-check, browser DAL/fallback evidence, PWA correlation, signed rebuild, and real-device acceptance and cannot reliably fit in one 18-minute checkpoint.",
@@ -24,30 +24,31 @@
     "privacy_rule": "Use synthetic/non-sensitive test data only; probe IDs must be random technical IDs with no user data; keep signing key/password outside Git and logs; diagnostics collect technical metadata only."
   },
   "last_checkpoint_evidence": {
-    "checkpoint": "A6a2a",
+    "checkpoint": "A6a2b",
     "result": "PASS",
-    "product_pr": 9,
-    "product_merge_sha": "58ce798e5f57360c1eec538afa59b0ff4ce13548",
-    "validation_head_sha": "30dc120d4bf9fc110474daeb4f948718e77eb829",
+    "product_pr": 10,
+    "product_merge_sha": "8fc16949e91756c5273321094784f53a764f1a1e",
+    "validation_head_sha": "abc03c83f40501b6be9fb27f73d628bfddafaa3f",
     "ci": {
-      "debug_run_id": 34939626596,
+      "debug_run_id": 34940896194,
       "debug_build": "success",
-      "release_run_id": 34939626551,
+      "release_run_id": 34940896168,
       "android_unit_tests": "success",
       "unsigned_release_build": "success"
     },
-    "self_check_primitives": {
-      "signer": "Reads installed APK signing certificate SHA-256 and reports only match/mismatch/unavailable state against the published LINKPAS release fingerprint.",
-      "app_links": "Android 12+ DomainVerificationManager maps linkpas.vercel.app to verified, user_selected, none, missing_host, or unknown_state; Android <12 is explicitly unsupported_api.",
-      "browser_twa_capability": "Discovers the default browser and TWA-capable Custom Tabs providers using the TrustedWebActivities service category, with query_failed/not_advertised/available_provider_only/default_provider_supported states.",
-      "diagnostics": "Beta launch emits native_self_check asynchronously through the existing sanitized diagnostics transport without delaying the normal TWA launch path.",
-      "privacy": "No raw certificate, clipboard, affiliate-link content, license value, credential, or device identifier is emitted; only technical package/browser/domain state is reported."
+    "browser_dal_and_fallback": {
+      "provider_binding": "Uses the actual Android Browser Helper TWA provider package selected by TwaLauncher and binds Custom Tabs validation to that provider.",
+      "dal_relationship": "Requests RELATION_HANDLE_ALL_URLS validation for https://linkpas.vercel.app and preserves callback true, callback false, and no-callback/unavailable evidence as distinct states.",
+      "timeout_policy": "A missing browser callback times out to inconclusive; timeout is never promoted to false or pass.",
+      "fallback_observability": "Wraps the existing Android Browser Helper fallback strategy and emits fallback_invoked evidence before delegating to the actual fallback launch.",
+      "diagnostics": "Beta-only native_twa_evidence is sent through the existing best-effort diagnostics transport without changing normal user-facing workflow.",
+      "privacy": "Evidence contains bounded technical provider/relationship/fallback state only; no user content, clipboard data, affiliate-link contents, signing material, credentials, or device identifiers are collected."
     },
     "tests": {
-      "app_links_unsupported_below_api31": "pass",
-      "app_links_state_mapping": "pass",
-      "twa_capability_tristate_mapping": "pass",
-      "fingerprint_normalization_and_match": "pass"
+      "relationship_true_false_distinct": "pass",
+      "missing_callback_inconclusive": "pass",
+      "request_rejected_inconclusive": "pass",
+      "fallback_state_explicit": "pass"
     },
     "remaining_blocker": null
   },
