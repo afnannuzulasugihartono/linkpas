@@ -26,6 +26,7 @@
       const registration = await navigator.serviceWorker.register('./sw.js');
       diagnostics?.breadcrumb('service_worker_registered', registration.scope || 'registered');
     } catch (error) {
+      diagnostics?.noteError?.('service_worker_registration');
       diagnostics?.breadcrumb('service_worker_register_failed');
       void diagnostics?.report({
         errorType: 'service_worker_registration',

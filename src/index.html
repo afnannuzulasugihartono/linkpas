@@ -80,8 +80,37 @@
       </section>
     </main>
 
-    <footer>LINKPAS tidak mengecek apakah produk masih aktif atau komisi masih tersedia. Tool ini hanya merapikan format link secara lokal.</footer>
+    <footer>
+      LINKPAS tidak mengecek apakah produk masih aktif atau komisi masih tersedia. Tool ini hanya merapikan format link secara lokal.
+      <button class="version-label" id="version-label" type="button" aria-label="Versi LINKPAS">v0.1.0-beta</button>
+    </footer>
   </div>
+
+  <section class="diagnostics-panel" id="diagnostics-panel" hidden aria-hidden="true" aria-label="Beta Diagnostics">
+    <div class="diagnostics-card" role="dialog" aria-modal="true" aria-labelledby="diagnostics-title">
+      <div class="diagnostics-head">
+        <div>
+          <div class="eyebrow">Beta only</div>
+          <h2 id="diagnostics-title">LINKPAS Diagnostics</h2>
+        </div>
+        <button class="ghost diagnostics-close" id="diagnostics-close-btn" type="button">Tutup</button>
+      </div>
+      <dl class="diagnostics-grid">
+        <div><dt>App version</dt><dd id="diagnostics-app-version">—</dd></div>
+        <div><dt>Package</dt><dd id="diagnostics-package">—</dd></div>
+        <div><dt>Domain</dt><dd id="diagnostics-domain">—</dd></div>
+        <div><dt>Network</dt><dd id="diagnostics-online">—</dd></div>
+        <div><dt>Service Worker</dt><dd id="diagnostics-service-worker">—</dd></div>
+        <div><dt>Last diagnostic error</dt><dd id="diagnostics-last-error">—</dd></div>
+        <div class="diagnostics-wide"><dt>Last Report ID</dt><dd id="diagnostics-last-report">Belum ada</dd></div>
+      </dl>
+      <p class="diagnostics-privacy">Laporan hanya berisi metadata teknis. Isi link affiliate, clipboard, email, kode lisensi, password, dan konten pribadi tidak ditampilkan atau dikirim dari panel ini.</p>
+      <div class="diagnostics-actions">
+        <button class="primary" id="diagnostics-send-btn" type="button">Kirim laporan diagnostik</button>
+        <span id="diagnostics-send-status" aria-live="polite"></span>
+      </div>
+    </div>
+  </section>
 
   <template id="results-template">
     <div class="toolbar">
@@ -119,5 +148,6 @@
   <script src="./license.js"></script>
   <script src="./app.js"></script>
   <script src="./pwa.js"></script>
+  <script src="./diagnostics-panel.js"></script>
 </body>
 </html>

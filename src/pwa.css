@@ -10,7 +10,28 @@
 .license-status { min-height: 20px; margin-top: 8px; color: var(--muted); font-size: 12px; }
 .license-status[data-tone="success"] { color: var(--accent-2); }
 .license-status[data-tone="warn"] { color: var(--warn); }
+.version-label { display: inline-block; margin-left: 6px; padding: 2px 4px; border: 0; background: transparent; color: inherit; opacity: .45; font: inherit; font-size: 11px; cursor: default; }
+.version-label:focus-visible { outline: 1px solid var(--accent-2); outline-offset: 2px; border-radius: 4px; opacity: 1; }
+.diagnostics-panel[hidden] { display: none !important; }
+.diagnostics-panel { position: fixed; inset: 0; z-index: 10000; display: grid; align-items: end; background: rgba(0, 0, 0, .62); padding: 18px; }
+.diagnostics-card { width: min(720px, 100%); margin: 0 auto; max-height: min(82dvh, 720px); overflow: auto; background: #0b1711; color: #eaf5ee; border: 1px solid #294d37; border-radius: 20px; padding: 18px; box-shadow: 0 20px 70px rgba(0, 0, 0, .42); }
+.diagnostics-head { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.diagnostics-head h2 { margin: 4px 0 0; }
+.diagnostics-close { flex: 0 0 auto; }
+.diagnostics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
+.diagnostics-grid > div { min-width: 0; padding: 10px 12px; border: 1px solid #203b2c; border-radius: 12px; background: #0f2017; }
+.diagnostics-grid dt { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.diagnostics-grid dd { margin: 4px 0 0; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+.diagnostics-wide { grid-column: 1 / -1; }
+.diagnostics-privacy { margin: 0 0 14px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.diagnostics-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+#diagnostics-send-status { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
 @media (max-width: 520px) {
   .license-form { grid-template-columns: 1fr; }
   .license-form button { width: 100%; }
+  .diagnostics-panel { padding: 10px; }
+  .diagnostics-grid { grid-template-columns: 1fr; }
+  .diagnostics-wide { grid-column: auto; }
+  .diagnostics-actions { align-items: stretch; }
+  .diagnostics-actions button { width: 100%; }
 }

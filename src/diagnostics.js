@@ -5,6 +5,7 @@
   const MAX_BREADCRUMBS = 20;
   const breadcrumbs = [];
   let lastReportId = null;
+  let lastDiagnosticError = null;
   let lastSendOutcome = { ok: null, status: null, error: null };
   let sending = false;
 
@@ -22,6 +23,10 @@
       state: safeText(state, 80) || '',
     });
     if (breadcrumbs.length > MAX_BREADCRUMBS) breadcrumbs.splice(0, breadcrumbs.length - MAX_BREADCRUMBS);
+  }
+
+  function noteError(errorType) {
+    lastDiagnosticError = safeText(errorType, 100) || 'unknown_error';
   }
 
   function serviceWorkerState() {
@@ -98,6 +103,7 @@
     try {
       const response = await fetch(input, init);
       if (!response.ok) {
+        noteError('fetch_failure');
         breadcrumb('fetch_failed', `${requestKind}:${response.status}`);
         void sendReport({
           errorType: 'fetch_failure',
@@ -109,6 +115,7 @@
       }
       return response;
     } catch (error) {
+      noteError('fetch_exception');
       breadcrumb('fetch_exception', requestKind);
       void sendReport({
         errorType: 'fetch_exception',
@@ -121,6 +128,7 @@
   }
 
   window.addEventListener('error', (event) => {
+    noteError('window_error');
     breadcrumb('window_error');
     void sendReport({
       errorType: 'window_error',
@@ -136,6 +144,7 @@
 
   window.addEventListener('unhandledrejection', (event) => {
     const reason = event.reason;
+    noteError('unhandledrejection');
     breadcrumb('unhandled_rejection');
     void sendReport({
       errorType: 'unhandledrejection',
@@ -152,9 +161,11 @@
 
   window.LinkPasDiagnostics = {
     breadcrumb,
+    noteError,
     report: sendReport,
     fetch: trackedFetch,
     getBreadcrumbs: () => breadcrumbs.slice(),
+    getLastError: () => lastDiagnosticError,
     getLastReportId: () => lastReportId,
     getLastSendOutcome: () => ({ ...lastSendOutcome }),
     getServiceWorkerState: serviceWorkerState,
