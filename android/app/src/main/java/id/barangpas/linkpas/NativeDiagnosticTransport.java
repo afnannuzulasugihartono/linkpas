@@ -12,13 +12,18 @@ import java.util.regex.Pattern;
 
 final class NativeDiagnosticTransport {
     private static final Pattern REPORT_ID = Pattern.compile("\\\"report_id\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"");
+    private static volatile String lastFailureCode = "none";
 
     private NativeDiagnosticTransport() {}
 
     static String post(String endpoint, String apiKey, String payload) {
         HttpURLConnection connection = null;
+        lastFailureCode = "none";
         try {
-            if (endpoint == null || endpoint.isEmpty() || apiKey == null || apiKey.isEmpty()) return null;
+            if (endpoint == null || endpoint.isEmpty() || apiKey == null || apiKey.isEmpty()) {
+                lastFailureCode = "missing_config";
+                return null;
+            }
             connection = (HttpURLConnection) new URL(endpoint).openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(1200);
@@ -35,15 +40,29 @@ final class NativeDiagnosticTransport {
             }
 
             int status = connection.getResponseCode();
-            if (status < 200 || status >= 300) return null;
+            if (status < 200 || status >= 300) {
+                lastFailureCode = "http_" + status;
+                return null;
+            }
             String body = readAll(connection.getInputStream());
             Matcher matcher = REPORT_ID.matcher(body);
-            return matcher.find() ? matcher.group(1) : null;
-        } catch (Exception ignored) {
+            if (!matcher.find()) {
+                lastFailureCode = "missing_report_id";
+                return null;
+            }
+            lastFailureCode = "ok";
+            return matcher.group(1);
+        } catch (Exception error) {
+            String name = error.getClass().getSimpleName();
+            lastFailureCode = (name == null || name.isEmpty()) ? "transport_exception" : name.substring(0, Math.min(name.length(), 80));
             return null;
         } finally {
             if (connection != null) connection.disconnect();
         }
+    }
+
+    static String getLastFailureCode() {
+        return lastFailureCode;
     }
 
     private static String readAll(InputStream input) throws Exception {
