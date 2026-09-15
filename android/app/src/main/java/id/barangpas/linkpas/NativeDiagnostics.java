@@ -40,6 +40,9 @@ final class NativeDiagnostics {
         markStage(app, "launcher_init");
         installCrashHandler(app);
         flushPendingAsync(app);
+        if (BuildConfig.VERSION_NAME.contains("-beta")) {
+            emitNativeSelfCheckAsync(app);
+        }
     }
 
     static void emitControlledTestAsync(Context context, Intent launchIntent, Runnable completion) {
@@ -117,6 +120,32 @@ final class NativeDiagnostics {
         }, "linkpas-diag-flush").start();
     }
 
+    private static void emitNativeSelfCheckAsync(Context context) {
+        new Thread(() -> {
+            String payload = buildSelfCheckPayload(context);
+            String reportId = NativeDiagnosticTransport.post(
+                    BuildConfig.DIAGNOSTICS_ENDPOINT,
+                    BuildConfig.DIAGNOSTICS_PUBLISHABLE_KEY,
+                    payload);
+            try {
+                SharedPreferences.Editor editor =
+                        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
+                if (reportId != null) {
+                    editor.remove(KEY_LAST_TRANSPORT_ERROR)
+                            .putString(KEY_LAST_REPORT, reportId)
+                            .apply();
+                } else {
+                    editor.putString(KEY_LAST_TRANSPORT_ERROR,
+                            NativeDiagnosticSanitizer.redact(
+                                    NativeDiagnosticTransport.getLastFailureCode(), 80))
+                            .apply();
+                }
+            } catch (Exception ignored) {
+                // Self-check reporting must never affect normal launch.
+            }
+        }, "linkpas-self-check").start();
+    }
+
     private static void emitAsync(Context context, String payload, boolean controlledTest, Runnable completion) {
         new Thread(() -> {
             try {
@@ -147,6 +176,42 @@ final class NativeDiagnostics {
                 }
             }
         }, "linkpas-diag-send").start();
+    }
+
+    private static String buildSelfCheckPayload(Context context) {
+        try {
+            JSONObject diagnostics = NativeSelfCheck.collect(context);
+            diagnostics.put("app_stage", "native_self_check");
+            diagnostics.put("twa_status", "self_check_primitives_only");
+            diagnostics.put("release_channel", "beta");
+            diagnostics.put("launch_url_host", NativeSelfCheck.HOST);
+            diagnostics.put("launch_url_path", "/");
+
+            JSONObject root = new JSONObject();
+            root.put("source", "android");
+            root.put("app_version", BuildConfig.VERSION_NAME);
+            root.put("build_version", String.valueOf(BuildConfig.VERSION_CODE));
+            root.put("package_name", context.getPackageName());
+            root.put("platform", "android");
+            root.put("platform_version", "sdk-" + Build.VERSION.SDK_INT);
+            root.put("browser", diagnostics.optString("browser_provider", "unresolved"));
+            root.put("error_type", "native_self_check");
+            root.put("error_message", "Automatic Beta native self-check");
+            root.put("page", "https://" + NativeSelfCheck.HOST + "/");
+            root.put("service_worker_state", "not_applicable_native");
+
+            JSONArray breadcrumbs = new JSONArray();
+            JSONObject crumb = new JSONObject();
+            crumb.put("event", "native_stage");
+            crumb.put("at", nowIso());
+            crumb.put("state", "native_self_check");
+            breadcrumbs.put(crumb);
+            root.put("breadcrumbs", breadcrumbs);
+            root.put("diagnostics", diagnostics);
+            return root.toString();
+        } catch (Exception ignored) {
+            return "{\"source\":\"android\",\"error_type\":\"native_self_check_payload_failed\"}";
+        }
     }
 
     private static String buildPayload(Context context, Intent launchIntent, String errorType,
