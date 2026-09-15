@@ -142,22 +142,40 @@ Acceptance:
 
 Target: 12-15 minutes. Hard stop: 18 minutes.
 
-## D4 — Android/TWA native diagnostics
+## D4a — Android/TWA native diagnostics implementation and build
 
 Scope:
-- Add minimal native diagnostics to the Android wrapper for startup and wrapper-level failures that the PWA collector cannot observe.
-- Record app version/package, launch URL, selected TWA/browser-provider state available to the app, startup stage, and uncaught native exception metadata.
-- Persist a pending native diagnostic locally if necessary and forward it safely to the D1 ingestion path when connectivity/app startup permits.
-- Keep ADB/logcat as the fallback for Android/TWA conditions that cannot be reliably observed from app code.
+- Add minimal native diagnostics to the Android wrapper for startup and wrapper-level failures the PWA cannot observe.
+- Record only technical metadata: app version/package, sanitized launch host/path, selected browser provider, startup stage, and uncaught native exception metadata.
+- Persist a pending uncaught-exception report locally and retry it asynchronously on next startup.
+- Add a Beta-only controlled diagnostic trigger that can be invoked by Android test tooling without user content.
+- Keep all network reporting best-effort and non-blocking.
 
 Acceptance:
-- A controlled native diagnostic event can be emitted and appears in Supabase.
-- Native reporting does not include signing secrets, credentials, user content, or raw clipboard data.
-- A reporting failure cannot crash or block app startup.
-- Release build still succeeds with the diagnostics code included.
+- Native diagnostic code is integrated into `LauncherActivity` without changing normal TWA launch behavior.
+- Public diagnostic endpoint/publishable key may be present; no service-role key, signing secret, credential, clipboard data, affiliate-link content, license value, or device identifier is added.
+- Transport failure is covered by a test and returns safely without throwing into app startup.
+- Sanitization is covered by a test.
+- Release APK build succeeds with native diagnostics included.
+- Runtime Android/Supabase emission is explicitly deferred to D4b; D4a must not claim it.
+
+Target: 12-15 minutes. Hard stop: 18 minutes.
+
+## D4b — Android runtime diagnostic emission and Supabase validation
+
+Scope:
+- Run the D4a Beta diagnostic trigger on an Android emulator or device.
+- Verify the native Android event reaches the D1 ingestion path and read the exact report back through authorized Supabase tooling.
+- Confirm normal TWA startup remains usable after diagnostics initialization.
+- Document which TWA/App Links conditions still require ADB/logcat rather than app telemetry.
+
+Acceptance:
+- A controlled native diagnostic event emitted by the Android runtime appears in Supabase with `source=android` and a stable report ID.
+- Stored report contains only sanitized technical metadata and no signing secrets, credentials, user content, raw clipboard data, license values, or device identifiers.
+- Reporting failure is non-blocking by D4a test evidence, and normal Android startup is not blocked by diagnostics initialization.
 - Limitations that still require ADB/logcat are documented.
 
-Target: 12-15 minutes. Hard stop: 18 minutes. Split D4 before implementation if native build/retest cannot fit safely.
+Target: 12-15 minutes. Hard stop: 18 minutes.
 
 ## D5 — End-to-end ChatGPT diagnostics workflow and ADB fallback
 
